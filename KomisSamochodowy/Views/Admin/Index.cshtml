@@ -1,0 +1,47 @@
+@model List<KomisSamochodowy.Controllers.UserWithRolesViewModel>
+@{
+    ViewData["Title"] = "Panel administratora";
+}
+
+<h1>Panel administratora</h1>
+<p class="text-muted">Zarządzanie rolami użytkowników (backlog: poz. 2 i 8).</p>
+
+@if (TempData["Sukces"] != null)
+{
+    <div class="alert alert-success">@TempData["Sukces"]</div>
+}
+
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>E-mail</th>
+            <th>Aktualna rola</th>
+            <th>Zmień rolę</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td>@u.Email</td>
+                <td>@(u.Roles.Any() ? string.Join(", ", u.Roles) : "— brak —")</td>
+                <td>
+                    <form asp-action="ZmienRole" method="post" class="d-flex gap-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="userId" value="@u.UserId" />
+                        <select name="nowaRola" class="form-select form-select-sm" style="max-width:180px;">
+                            @foreach (var r in (List<string>)ViewBag.WszystkieRole)
+                            {
+                                <option value="@r"
+                                        selected="@(u.Roles.Contains(r) ? "selected" : null)">
+                                    @r
+                                </option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">Zmień</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
