@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using KomisSamochodowy.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace KomisSamochodowy.Data
@@ -9,5 +10,6 @@ namespace KomisSamochodowy.Data
             : base(options)
         {
         }
+        public DbSet<Samochod> Samochody { get; set; }
     }
 }
