@@ -16,10 +16,55 @@ namespace KomisSamochodowy.Controllers
             _context = context;
         }
 
-        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Samochody.ToListAsync());
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> Oferty()
+        {
+            var oferty = await _context.Samochody
+                .Where(s => s.Status == "Dostępny" || s.Status == "Zarezerwowany")
+                .OrderByDescending(s => s.Id)
+                .ToListAsync();
+
+            return View(oferty);
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+                return NotFound();
+
+            var samochod = await _context.Samochody.FindAsync(id);
+
+            if (samochod == null)
+                return NotFound();
+
+            var canViewSoldCar = User.IsInRole("Administrator") || User.IsInRole("Sprzedawca");
+            if (samochod.Status == "Sprzedany" && !canViewSoldCar)
+                return NotFound();
+
+            return View(samochod);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Klient")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Reserve(int id)
+        {
+            var samochod = await _context.Samochody.FindAsync(id);
+
+            if (samochod == null || samochod.Status != "Dostępny")
+                return NotFound();
+
+            samochod.Status = "Zarezerwowany";
+            await _context.SaveChangesAsync();
+
+            TempData["Sukces"] = "Samochód został zarezerwowany.";
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         [HttpGet]
@@ -30,7 +75,7 @@ namespace KomisSamochodowy.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Marka,Model,RokProdukcji,Cena")] Samochod samochod)
+        public async Task<IActionResult> Create([Bind("Marka,Model,RokProdukcji,Cena,Przebieg,Paliwo,ZdjecieUrl,Status,Opis,GaleriaZdjec")] Samochod samochod)
         {
             if (ModelState.IsValid)
             {
@@ -56,7 +101,7 @@ namespace KomisSamochodowy.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Marka,Model,RokProdukcji,Cena")] Samochod samochod)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Marka,Model,RokProdukcji,Cena,Przebieg,Paliwo,ZdjecieUrl,Status,Opis,GaleriaZdjec")] Samochod samochod)
         {
             if (id != samochod.Id) return NotFound();
 

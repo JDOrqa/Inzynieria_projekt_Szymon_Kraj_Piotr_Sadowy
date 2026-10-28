@@ -1,5 +1,13 @@
 html {
   font-size: 14px;
+  position: relative;
+  min-height: 100%;
+}
+
+.gallery-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
 }
 
 @media (min-width: 768px) {
@@ -19,4 +27,123 @@ html {
 
 body {
   margin-bottom: 60px;
+  background: #f7f8fa;
+  color: #172033;
+}
+
+.car-card {
+  overflow: hidden;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.car-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 1rem 2rem rgba(23, 32, 51, .12) !important;
+}
+
+.car-image {
+  height: 220px;
+  object-fit: cover;
+  background: #e9edf2;
+}
+
+.car-specs {
+  display: flex;
+  justify-content: space-between;
+  padding: .8rem 0;
+  border-top: 1px solid #e8ebf0;
+  border-bottom: 1px solid #e8ebf0;
+  color: #647084;
+}
+
+.car-specs strong {
+  color: #172033;
+}
+
+.empty-state {
+  background: white;
+  border: 1px dashed #cbd2dc;
+  border-radius: 1rem;
+}
+
+.hero-panel {
+  background: linear-gradient(135deg, #eef4ff 0%, #ffffff 100%);
+  border: 1px solid #e1e9f8;
+}
+
+.section-kicker {
+  color: #0d6efd;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+
+.search-box {
+  max-width: 360px;
+}
+
+.car-price {
+  color: #0d6efd;
+  font-size: 1.45rem;
+}
+
+.car-price small {
+  font-size: .75rem;
+  font-weight: 600;
+}
+
+.image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8d99aa;
+}
+
+.details-image {
+  width: 100%;
+  min-height: 420px;
+  object-fit: cover;
+  background: #e9edf2;
+}
+
+.details-list > div {
+  display: flex;
+  justify-content: space-between;
+  padding: .8rem 0;
+  border-bottom: 1px solid #e8ebf0;
+}
+
+.details-list span {
+  color: #647084;
+}
+
+.status-badge {
+  font-weight: 600;
+}
+
+.status-dostępny {
+  color: #146c43;
+  background: #d1e7dd;
+}
+
+.status-zarezerwowany {
+  color: #664d03;
+  background: #fff3cd;
+}
+
+.status-sprzedany {
+  color: #842029;
+  background: #f8d7da;
+}
+
+@media (max-width: 575.98px) {
+  .search-box {
+    max-width: none;
+    width: 100%;
+  }
+
+  .details-image {
+    min-height: 260px;
+  }
+}
 }

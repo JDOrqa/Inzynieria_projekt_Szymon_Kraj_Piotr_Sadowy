@@ -33,6 +33,10 @@ namespace KomisSamochodowy.Data.Migrations
                     b.Property<decimal>("Cena")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("GaleriaZdjec")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<string>("Marka")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -43,8 +47,30 @@ namespace KomisSamochodowy.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("Opis")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Paliwo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("Przebieg")
+                        .HasColumnType("int");
+
                     b.Property<int>("RokProdukcji")
                         .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("ZdjecieUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.HasKey("Id");
 

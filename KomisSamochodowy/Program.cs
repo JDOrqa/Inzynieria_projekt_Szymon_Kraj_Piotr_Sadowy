@@ -41,7 +41,9 @@ using (var scope = app.Services.CreateScope())
     var sp = scope.ServiceProvider;
     var userManager = sp.GetRequiredService<UserManager<IdentityUser>>();
     var roleManager = sp.GetRequiredService<RoleManager<IdentityRole>>();
-    await SeedData.InitializeAsync(userManager, roleManager);
+    var dbContext = sp.GetRequiredService<ApplicationDbContext>();
+    await dbContext.Database.MigrateAsync();
+    await SeedData.InitializeAsync(userManager, roleManager, dbContext);
 }
 
 if (app.Environment.IsDevelopment())

@@ -36,6 +36,53 @@
                 <span asp-validation-for="Cena" class="text-danger"></span>
             </div>
 
+            <div class="form-group mb-3">
+                <label asp-for="Przebieg" class="control-label"></label>
+                <input asp-for="Przebieg" class="form-control" min="0" />
+                <span asp-validation-for="Przebieg" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Paliwo" class="control-label"></label>
+                <select asp-for="Paliwo" class="form-select">
+                    <option value="">Wybierz paliwo</option>
+                    <option>Benzyna</option>
+                    <option>Diesel</option>
+                    <option>Hybryda</option>
+                    <option>Elektryczny</option>
+                    <option>LPG</option>
+                </select>
+                <span asp-validation-for="Paliwo" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ZdjecieUrl" class="control-label">Adres zdjęcia</label>
+                <input asp-for="ZdjecieUrl" class="form-control" placeholder="https://..." />
+                <span asp-validation-for="ZdjecieUrl" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Status" class="control-label"></label>
+                <select asp-for="Status" class="form-select">
+                    <option>Dostępny</option>
+                    <option>Zarezerwowany</option>
+                    <option>Sprzedany</option>
+                </select>
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Opis" class="control-label"></label>
+                <textarea asp-for="Opis" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="Opis" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="GaleriaZdjec" class="control-label">Galeria zdjęć</label>
+                <input asp-for="GaleriaZdjec" class="form-control" placeholder="URL-e zdjęć oddzielone przecinkami" />
+                <span asp-validation-for="GaleriaZdjec" class="text-danger"></span>
+            </div>
+
             <div class="form-group">
                 <button type="submit" class="btn btn-success">Dodaj samochód</button>
                 <a asp-action="Index" class="btn btn-secondary">Powrót do listy</a>
