@@ -1,10 +1,11 @@
 @model KomisSamochodowy.Models.Samochod
+
 @{
-    ViewData["Title"] = "Usuñ samochód";
+    ViewData["Title"] = "UsuÅ„ samochÃ³d";
 }
 
-<h1>Usuñ samochód</h1>
-<h3>Czy na pewno chcesz usun¹æ to auto z oferty?</h3>
+<h1>UsuÅ„ samochÃ³d</h1>
+<h3>Czy na pewno chcesz usunÄ…Ä‡ to auto z oferty?</h3>
 <div>
     <hr />
     <dl class="row">
@@ -21,9 +22,10 @@
         <dd class="col-sm-10">@Model.Cena PLN</dd>
     </dl>
 
-    <form asp-action="Delete">
+    <form asp-action="Delete" method="post">
+        @Html.AntiForgeryToken()
         <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Usuñ auto" class="btn btn-danger" /> |
-        <a asp-action="Index" class="btn btn-secondary">Powrót do listy</a>
+        <input type="submit" value="UsuÅ„ auto" class="btn btn-danger" /> |
+        <a asp-action="Index" class="btn btn-secondary">PowrÃ³t do listy</a>
     </form>
 </div>

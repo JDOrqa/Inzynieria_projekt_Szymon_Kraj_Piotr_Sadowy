@@ -1,0 +1,83 @@
+@model KomisSamochodowy.Models.Samochod
+
+@{
+    ViewData["Title"] = $"{Model.Marka} {Model.Model}";
+    var isClient = User.IsInRole("Klient");
+    var gallery = (Model.GaleriaZdjec ?? string.Empty)
+        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+}
+
+<div class="container py-4">
+    @if (TempData["Sukces"] != null)
+    {
+        <div class="alert alert-success">@TempData["Sukces"]</div>
+    }
+
+    <a asp-action="Oferty" class="btn btn-link px-0 mb-3"><i class="bi bi-arrow-left"></i> Wróć do ofert</a>
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-7">
+            @if (string.IsNullOrWhiteSpace(Model.ZdjecieUrl))
+            {
+                <div class="details-image image-placeholder rounded-4"><i class="bi bi-car-front fs-1"></i></div>
+            }
+            else
+            {
+                <img src="@Model.ZdjecieUrl" class="details-image rounded-4" alt="@Model.Marka @Model.Model" />
+            }
+        </div>
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+                <div class="d-flex justify-content-between gap-3 align-items-start">
+                    <div>
+                        <span class="section-kicker">OFERTA #@Model.Id</span>
+                        <h1 class="display-6 fw-bold mt-2">@Model.Marka @Model.Model</h1>
+                    </div>
+                    <span class="badge @(Model.Status == "Zarezerwowany" ? "text-bg-warning" : "text-bg-success")">@Model.Status</span>
+                </div>
+                <div class="details-list my-4">
+                    <div><span>Rocznik</span><strong>@Model.RokProdukcji</strong></div>
+                    <div><span>Przebieg</span><strong>@Model.Przebieg.ToString("N0") km</strong></div>
+                    <div><span>Paliwo</span><strong>@Model.Paliwo</strong></div>
+                </div>
+                <div class="car-price mb-4">@Model.Cena.ToString("N0") <small>PLN</small></div>
+                @if (isClient && Model.Status == "Dostępny")
+                {
+                    <form asp-action="Reserve" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-primary btn-lg w-100">Zarezerwuj samochód</button>
+                    </form>
+                }
+                else if (Model.Status == "Zarezerwowany")
+                {
+                    <div class="alert alert-warning mb-0">Ten samochód jest już zarezerwowany.</div>
+                }
+                else if (!User.Identity?.IsAuthenticated ?? true)
+                {
+                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-primary btn-lg w-100">Zaloguj się, aby zarezerwować</a>
+                }
+            </div>
+        </div>
+    @if (gallery.Length > 0)
+    {
+        <div class="mt-5">
+            <h2 class="h4 mb-3">Galeria zdjęć</h2>
+            <div class="row g-3">
+                @foreach (var image in gallery)
+                {
+                    <div class="col-6 col-md-4">
+                        <img src="@image" class="gallery-image rounded-3" alt="Zdjęcie samochodu" loading="lazy" />
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.Opis))
+    {
+        <div class="card border-0 shadow-sm mt-4 p-4">
+            <h2 class="h4">Opis pojazdu</h2>
+            <p class="text-secondary mb-0">@Model.Opis</p>
+        </div>
+    }
+    </div>
+</div>

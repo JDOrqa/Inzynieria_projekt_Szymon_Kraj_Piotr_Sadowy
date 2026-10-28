@@ -1,0 +1,95 @@
+@model IEnumerable<KomisSamochodowy.Models.Samochod>
+
+@{
+    ViewData["Title"] = "Oferty samochodów";
+}
+
+<div class="container py-4">
+    <div class="hero-panel rounded-4 p-4 p-md-5 mb-4">
+        <span class="section-kicker">KOMIS SAMOCHODOWY</span>
+        <h1 class="display-5 fw-bold mt-2 mb-2">Znajdź samochód dla siebie</h1>
+        <p class="lead mb-0 text-secondary">Przeglądaj sprawdzone pojazdy dostępne w naszej ofercie.</p>
+    </div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="h3 mb-1">Aktualne oferty</h2>
+            <span class="text-muted">@Model.Count() pojazdów dostępnych w ofercie</span>
+        </div>
+        <div class="d-flex flex-wrap gap-2 search-box">
+            <div class="input-group flex-grow-1">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                <input id="offerSearch" type="search" class="form-control border-start-0" placeholder="Szukaj marki lub modelu..." aria-label="Szukaj oferty" />
+            </div>
+            <select id="fuelFilter" class="form-select" aria-label="Filtruj paliwo">
+                <option value="">Wszystkie paliwa</option>
+                <option>Benzyna</option>
+                <option>Diesel</option>
+                <option>Hybryda</option>
+                <option>Elektryczny</option>
+                <option>LPG</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="offerGrid" class="row g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col-12 col-md-6 col-xl-4 offer-item" data-search="@item.Marka @item.Model @item.Paliwo" data-fuel="@item.Paliwo">
+                <article class="card car-card h-100 border-0 shadow-sm">
+                    @if (string.IsNullOrWhiteSpace(item.ZdjecieUrl))
+                    {
+                        <div class="car-image image-placeholder"><i class="bi bi-car-front fs-1"></i></div>
+                    }
+                    else
+                    {
+                        <img src="@item.ZdjecieUrl" class="card-img-top car-image" alt="@item.Marka @item.Model" loading="lazy" />
+                    }
+                    <div class="card-body d-flex flex-column p-4">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <div>
+                                <h3 class="h4 mb-1">@item.Marka @item.Model</h3>
+                                <span class="text-muted">Rocznik @item.RokProdukcji</span>
+                            </div>
+                            @if (item.Status == "Zarezerwowany")
+                            {
+                                <span class="badge text-bg-warning">ZAREZERWOWANE</span>
+                            }
+                        </div>
+                        <div class="car-specs mt-3 mb-4">
+                            <span><strong>@item.Przebieg.ToString("N0")</strong> km</span>
+                            <span>@item.Paliwo</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-auto gap-3">
+                            <strong class="car-price">@item.Cena.ToString("N0") <small>PLN</small></strong>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary">Szczegóły</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        }
+    </div>
+    <div id="noOffers" class="empty-state text-center py-5 px-3 d-none">
+        <h2 class="h4">Nie znaleziono ofert</h2>
+        <p class="text-muted mb-0">Spróbuj zmienić wyszukiwaną frazę.</p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const filterOffers = () => {
+            const query = document.getElementById('offerSearch').value.toLowerCase().trim();
+            const fuel = document.getElementById('fuelFilter').value;
+            const items = document.querySelectorAll('.offer-item');
+            let visible = 0;
+            items.forEach(item => {
+                const matches = item.dataset.search.toLowerCase().includes(query) && (!fuel || item.dataset.fuel === fuel);
+                item.classList.toggle('d-none', !matches);
+                if (matches) visible++;
+            });
+            document.getElementById('noOffers').classList.toggle('d-none', visible !== 0);
+        };
+        document.getElementById('offerSearch')?.addEventListener('input', filterOffers);
+        document.getElementById('fuelFilter')?.addEventListener('change', filterOffers);
+    </script>
+}
