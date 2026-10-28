@@ -26,6 +26,9 @@
                         @if (User.IsInRole("Administrator") || User.IsInRole("Sprzedawca"))
                         {
                             <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Samochody" asp-action="Index">Panel pojazdów</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Home" asp-action="Sprzedaz">Sprzedaż</a>
                             </li>
                         }

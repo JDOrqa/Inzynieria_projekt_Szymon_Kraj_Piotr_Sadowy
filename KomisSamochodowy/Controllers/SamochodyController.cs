@@ -1,10 +1,12 @@
-﻿using KomisSamochodowy.Data;
+using KomisSamochodowy.Data;
 using KomisSamochodowy.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace KomisSamochodowy.Controllers
 {
+    [Authorize(Policy = "SprzedawcaOrAdmin")]
     public class SamochodyController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -14,9 +16,30 @@ namespace KomisSamochodowy.Controllers
             _context = context;
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Samochody.ToListAsync());
+        }
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("Marka,Model,RokProdukcji,Cena")] Samochod samochod)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Samochody.Add(samochod);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(samochod);
         }
 
 
