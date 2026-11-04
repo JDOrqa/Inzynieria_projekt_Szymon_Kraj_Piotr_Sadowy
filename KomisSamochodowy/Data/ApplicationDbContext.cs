@@ -1,4 +1,4 @@
-﻿using KomisSamochodowy.Models;
+using KomisSamochodowy.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,5 +13,6 @@ namespace KomisSamochodowy.Data
 
         public DbSet<Samochod> Samochody { get; set; }
         public DbSet<Transakcja> Transakcje { get; set; }
+        public DbSet<Rezerwacja> Rezerwacje { get; set; }
     }
 }

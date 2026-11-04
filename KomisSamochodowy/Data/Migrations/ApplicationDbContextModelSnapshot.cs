@@ -22,6 +22,36 @@ namespace KomisSamochodowy.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("KomisSamochodowy.Models.Rezerwacja", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataRezerwacji")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("KlientId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SamochodId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SamochodId");
+
+                    b.ToTable("Rezerwacje");
+                });
+
             modelBuilder.Entity("KomisSamochodowy.Models.Samochod", b =>
                 {
                     b.Property<int>("Id")
@@ -308,6 +338,17 @@ namespace KomisSamochodowy.Data.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("KomisSamochodowy.Models.Rezerwacja", b =>
+                {
+                    b.HasOne("KomisSamochodowy.Models.Samochod", "Samochod")
+                        .WithMany()
+                        .HasForeignKey("SamochodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Samochod");
                 });
 
             modelBuilder.Entity("KomisSamochodowy.Models.Transakcja", b =>

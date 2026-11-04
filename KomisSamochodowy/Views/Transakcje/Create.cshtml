@@ -1,0 +1,106 @@
+@model KomisSamochodowy.Models.ViewModels.UtworzTransakcjeViewModel
+@{
+    ViewData["Title"] = "Rejestracja Sprzedaży";
+    // Ustawiamy polską kulturę dla formatowania ceny
+    var plCulture = new System.Globalization.CultureInfo("pl-PL");
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="h3 fw-bold mb-4">Rejestracja Sprzedaży</h1>
+
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <!-- ZMODYFIKOWANY WYBÓR SAMOCHODU -->
+                        <div class="form-group mb-3">
+                            <label asp-for="SamochodId" class="control-label fw-semibold"></label>
+                            <select asp-for="SamochodId" class="form-select" id="samochodSelect">
+                                <option value="">-- Wybierz auto z oferty --</option>
+                                @foreach (var auto in Model.DostepneSamochody)
+                                {
+                                    // Zamieniamy przecinek na kropkę dla JS
+                                    var cenaDlaJs = auto.Cena.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                                    var isSelected = Model.SamochodId == auto.Id ? "selected" : null;
+
+                                    <option value="@auto.Id" data-cena="@cenaDlaJs" selected="@isSelected">
+                                        @auto.Marka @auto.Model (@auto.RokProdukcji) - @auto.Cena.ToString("N0") PLN
+                                    </option>
+                                }
+                            </select>
+                            <span asp-validation-for="SamochodId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="KlientId" class="control-label fw-semibold"></label>
+                            <select asp-for="KlientId" asp-items="Model.Klienci" class="form-select">
+                                <option value="">-- Wybierz klienta z bazy --</option>
+                            </select>
+                            <span asp-validation-for="KlientId" class="text-danger"></span>
+                        </div>
+
+                        <!-- POLE KWOTY (z id="kwotaInput" do obsługi JS) -->
+                        <div class="form-group mb-3">
+                            <label asp-for="Kwota" class="control-label fw-semibold"></label>
+                            <div class="input-group">
+                                <input asp-for="Kwota" class="form-control" type="number" step="0.01" id="kwotaInput" />
+                                <span class="input-group-text">PLN</span>
+                            </div>
+                            <span asp-validation-for="Kwota" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="DataTransakcji" class="control-label fw-semibold"></label>
+                            <input asp-for="DataTransakcji" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="DataTransakcji" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">Zatwierdź sprzedaż</button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">Powrót do historii</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <!-- SKRYPT AUTOMATYCZNIE POBIRAJĄCY CENĘ -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const samochodSelect = document.getElementById("samochodSelect");
+            const kwotaInput = document.getElementById("kwotaInput");
+
+            function aktualizujCene() {
+                const selectedOption = samochodSelect.options[samochodSelect.selectedIndex];
+
+                // Jeśli wybrano auto (value nie jest puste)
+                if (selectedOption && selectedOption.value !== "") {
+                    const cena = selectedOption.getAttribute("data-cena");
+                    if (cena) {
+                        kwotaInput.value = parseFloat(cena).toFixed(2);
+                    }
+                } else {
+                    kwotaInput.value = "";
+                }
+            }
+
+            // Podpięcie zdarzenia zmiany opcji
+            samochodSelect.addEventListener("change", aktualizujCene);
+
+            // Jeśli wracamy do formularza z błędem i cena jest pusta, dociągamy ją
+            if (samochodSelect.value !== "" && kwotaInput.value === "") {
+                aktualizujCene();
+            }
+        });
+    </script>
+}

@@ -1,0 +1,48 @@
+@model IEnumerable<KomisSamochodowy.Models.Transakcja>
+@using Microsoft.AspNetCore.Identity
+@{
+    ViewData["Title"] = "Historia Sprzedaży";
+    var users = ViewBag.Users as Dictionary<string, string>;
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-6 fw-bold">Historia Sprzedaży</h1>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-cash-coin"></i> Zarejestruj sprzedaż
+        </a>
+    </div>
+
+    @if (TempData["Sukces"] != null)
+    {
+        <div class="alert alert-success">@TempData["Sukces"]</div>
+    }
+
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Data</th>
+                        <th>Samochód</th>
+                        <th>Klient</th>
+                        <th>Sprzedawca</th>
+                        <th>Kwota</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.DataTransakcji.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td class="fw-semibold">@item.Samochod?.Marka @item.Samochod?.Model</td>
+                            <td>@(users.ContainsKey(item.KlientId) ? users[item.KlientId] : "Nieznany")</td>
+                            <td>@(users.ContainsKey(item.SprzedawcaId) ? users[item.SprzedawcaId] : "Nieznany")</td>
+                            <td class="fw-bold text-success">@item.Kwota.ToString("N0") PLN</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
