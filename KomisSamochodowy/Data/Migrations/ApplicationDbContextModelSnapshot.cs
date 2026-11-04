@@ -68,13 +68,44 @@ namespace KomisSamochodowy.Data.Migrations
                         .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("ZdjecieUrl")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Samochody");
+                });
+
+            modelBuilder.Entity("KomisSamochodowy.Models.Transakcja", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataTransakcji")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("KlientId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Kwota")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("SamochodId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SprzedawcaId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SamochodId");
+
+                    b.ToTable("Transakcje");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -277,6 +308,17 @@ namespace KomisSamochodowy.Data.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("KomisSamochodowy.Models.Transakcja", b =>
+                {
+                    b.HasOne("KomisSamochodowy.Models.Samochod", "Samochod")
+                        .WithMany()
+                        .HasForeignKey("SamochodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Samochod");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

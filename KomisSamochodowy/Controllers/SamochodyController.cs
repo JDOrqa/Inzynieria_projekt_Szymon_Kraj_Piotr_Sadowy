@@ -3,6 +3,7 @@ using KomisSamochodowy.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
 
 namespace KomisSamochodowy.Controllers
 {
@@ -10,10 +11,12 @@ namespace KomisSamochodowy.Controllers
     public class SamochodyController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public SamochodyController(ApplicationDbContext context)
+        public SamochodyController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<IActionResult> Index()
@@ -35,17 +38,13 @@ namespace KomisSamochodowy.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var samochod = await _context.Samochody.FindAsync(id);
-
-            if (samochod == null)
-                return NotFound();
+            if (samochod == null) return NotFound();
 
             var canViewSoldCar = User.IsInRole("Administrator") || User.IsInRole("Sprzedawca");
-            if (samochod.Status == "Sprzedany" && !canViewSoldCar)
-                return NotFound();
+            if (samochod.Status == "Sprzedany" && !canViewSoldCar) return NotFound();
 
             return View(samochod);
         }
@@ -57,8 +56,7 @@ namespace KomisSamochodowy.Controllers
         {
             var samochod = await _context.Samochody.FindAsync(id);
 
-            if (samochod == null || samochod.Status != "Dostępny")
-                return NotFound();
+            if (samochod == null || samochod.Status != "Dostępny") return NotFound();
 
             samochod.Status = "Zarezerwowany";
             await _context.SaveChangesAsync();
@@ -75,18 +73,32 @@ namespace KomisSamochodowy.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Marka,Model,RokProdukcji,Cena,Przebieg,Paliwo,ZdjecieUrl,Status,Opis,GaleriaZdjec")] Samochod samochod)
+        public async Task<IActionResult> Create([Bind("Marka,Model,RokProdukcji,Cena,Przebieg,Paliwo,PlikZdjecia,Status,Opis,GaleriaZdjec")] Samochod samochod)
         {
             if (ModelState.IsValid)
             {
+                if (samochod.PlikZdjecia != null)
+                {
+                    string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+                    if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + samochod.PlikZdjecia.FileName;
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await samochod.PlikZdjecia.CopyToAsync(fileStream);
+                    }
+
+                    samochod.ZdjecieUrl = "/uploads/" + uniqueFileName;
+                }
+
                 _context.Samochody.Add(samochod);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-
             return View(samochod);
         }
-
 
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
@@ -101,19 +113,42 @@ namespace KomisSamochodowy.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Marka,Model,RokProdukcji,Cena,Przebieg,Paliwo,ZdjecieUrl,Status,Opis,GaleriaZdjec")] Samochod samochod)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Marka,Model,RokProdukcji,Cena,Przebieg,Paliwo,ZdjecieUrl,PlikZdjecia,Status,Opis,GaleriaZdjec")] Samochod samochod)
         {
             if (id != samochod.Id) return NotFound();
 
             if (ModelState.IsValid)
             {
-                _context.Update(samochod);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    if (samochod.PlikZdjecia != null)
+                    {
+                        string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+                        if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+                        string uniqueFileName = Guid.NewGuid().ToString() + "_" + samochod.PlikZdjecia.FileName;
+                        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await samochod.PlikZdjecia.CopyToAsync(fileStream);
+                        }
+
+                        samochod.ZdjecieUrl = "/uploads/" + uniqueFileName;
+                    }
+
+                    _context.Update(samochod);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!_context.Samochody.Any(e => e.Id == id)) return NotFound();
+                    else throw;
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View(samochod);
         }
-
 
         [HttpGet]
         public async Task<IActionResult> Delete(int? id)

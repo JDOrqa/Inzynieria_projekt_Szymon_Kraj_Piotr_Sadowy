@@ -9,7 +9,8 @@
 
 <div class="row">
     <div class="col-md-5">
-        <form asp-action="Create" method="post">
+        <!-- DODANO: enctype="multipart/form-data" aby móc wysyłać pliki -->
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-group mb-3">
@@ -55,10 +56,11 @@
                 <span asp-validation-for="Paliwo" class="text-danger"></span>
             </div>
 
+            <!-- ZMIENIONO: Zamiast ZdjecieUrl jest fizyczny wybór pliku (PlikZdjecia) -->
             <div class="form-group mb-3">
-                <label asp-for="ZdjecieUrl" class="control-label">Adres zdjęcia</label>
-                <input asp-for="ZdjecieUrl" class="form-control" placeholder="https://..." />
-                <span asp-validation-for="ZdjecieUrl" class="text-danger"></span>
+                <label asp-for="PlikZdjecia" class="control-label">Zdjęcie pojazdu</label>
+                <input type="file" asp-for="PlikZdjecia" class="form-control" accept="image/*" />
+                <span asp-validation-for="PlikZdjecia" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-3">
@@ -92,5 +94,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema; 
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Http;
 
 namespace KomisSamochodowy.Models
 {
@@ -21,7 +22,7 @@ namespace KomisSamochodowy.Models
 
         [Required(ErrorMessage = "Pole Cena jest wymagane.")]
         [Range(0, 10000000, ErrorMessage = "Cena musi być większa lub równa 0.")]
-        [Column(TypeName = "decimal(18,2)")] 
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Cena { get; set; }
 
         [Required(ErrorMessage = "Pole Przebieg jest wymagane.")]
@@ -32,10 +33,12 @@ namespace KomisSamochodowy.Models
         [StringLength(20)]
         public string Paliwo { get; set; }
 
-        [Required(ErrorMessage = "Podaj adres zdjęcia samochodu.")]
-        [Url(ErrorMessage = "Podaj poprawny adres URL zdjęcia.")]
         [StringLength(500)]
-        public string ZdjecieUrl { get; set; }
+        public string? ZdjecieUrl { get; set; }
+
+        [NotMapped]
+        [Display(Name = "Wybierz zdjęcie")]
+        public IFormFile? PlikZdjecia { get; set; }
 
         [Required(ErrorMessage = "Wybierz status samochodu.")]
         [StringLength(30)]

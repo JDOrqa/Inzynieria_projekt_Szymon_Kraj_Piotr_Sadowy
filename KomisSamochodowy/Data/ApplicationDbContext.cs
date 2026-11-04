@@ -10,6 +10,8 @@ namespace KomisSamochodowy.Data
             : base(options)
         {
         }
+
         public DbSet<Samochod> Samochody { get; set; }
+        public DbSet<Transakcja> Transakcje { get; set; }
     }
 }
