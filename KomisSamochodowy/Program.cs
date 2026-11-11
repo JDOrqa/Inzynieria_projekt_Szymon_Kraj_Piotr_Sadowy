@@ -19,6 +19,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     options.Password.RequireDigit = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = false;
+    options.Lockout.AllowedForNewUsers = true; 
 })
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();

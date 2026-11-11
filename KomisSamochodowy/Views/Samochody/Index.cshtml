@@ -35,7 +35,7 @@
                         <tr>
                             <td class="text-muted">#@item.Id</td>
                             <td>
-                                <div class="fw-semibold">@item.Marka @item.Model</div>
+                                <div class="fw-semibold">@item.Marka?.Nazwa @item.Model?.Nazwa</div>
                                 <small class="text-muted">@item.Paliwo · @item.Przebieg.ToString("N0") km</small>
                             </td>
                             <td>@item.RokProdukcji</td>

@@ -41,13 +41,12 @@ namespace KomisSamochodowy.Controllers
                 {
                     UserId = u.Id,
                     Email = u.Email ?? "(brak)",
-                    Roles = roles.ToList()
+                    Roles = roles.ToList(),
+                    IsLocked = u.LockoutEnd != null && u.LockoutEnd > DateTimeOffset.UtcNow 
                 });
             }
 
-            ViewBag.WszystkieRole = _roleManager.Roles
-                                                 .Select(r => r.Name!)
-                                                 .ToList();
+            ViewBag.WszystkieRole = _roleManager.Roles.Select(r => r.Name!).ToList();
             return View(model);
         }
 
@@ -65,6 +64,32 @@ namespace KomisSamochodowy.Controllers
             await _userManager.AddToRoleAsync(user, nowaRola);
 
             TempData["Sukces"] = $"Rola użytkownika {user.Email} → {nowaRola}.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PrzelaczBlokade(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return NotFound();
+
+            // Sprawdzamy, czy obecnie zablokowany
+            var isLocked = user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow;
+
+            if (isLocked)
+            {
+                // Odblokowanie
+                await _userManager.SetLockoutEndDateAsync(user, null);
+                TempData["Sukces"] = $"Konto {user.Email} zostało odblokowane.";
+            }
+            else
+            {
+                // Zablokowanie na "zawsze"
+                await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+                TempData["Sukces"] = $"Konto {user.Email} zostało zablokowane.";
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -141,5 +166,6 @@ namespace KomisSamochodowy.Controllers
         public string UserId { get; set; } = "";
         public string Email { get; set; } = "";
         public List<string> Roles { get; set; } = new();
+        public bool IsLocked { get; set; } 
     }
 }

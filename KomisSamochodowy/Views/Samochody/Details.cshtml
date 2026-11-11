@@ -1,7 +1,8 @@
 @model KomisSamochodowy.Models.Samochod
 
 @{
-    ViewData["Title"] = $"{Model.Marka} {Model.Model}";
+   
+    ViewData["Title"] = $"{Model.Marka?.Nazwa} {Model.Model?.Nazwa}";
     var isClient = User.IsInRole("Klient");
     var gallery = (Model.GaleriaZdjec ?? string.Empty)
         .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -22,7 +23,8 @@
             }
             else
             {
-                <img src="@Model.ZdjecieUrl" class="details-image rounded-4" alt="@Model.Marka @Model.Model" />
+               
+                <img src="@Model.ZdjecieUrl" class="details-image rounded-4" alt="@Model.Marka?.Nazwa @Model.Model?.Nazwa" />
             }
         </div>
         <div class="col-lg-5">
@@ -30,7 +32,8 @@
                 <div class="d-flex justify-content-between gap-3 align-items-start">
                     <div>
                         <span class="section-kicker">OFERTA #@Model.Id</span>
-                        <h1 class="display-6 fw-bold mt-2">@Model.Marka @Model.Model</h1>
+                        
+                        <h1 class="display-6 fw-bold mt-2">@Model.Marka?.Nazwa @Model.Model?.Nazwa</h1>
                     </div>
                     <span class="badge @(Model.Status == "Zarezerwowany" ? "text-bg-warning" : "text-bg-success")">@Model.Status</span>
                 </div>
@@ -58,26 +61,26 @@
                 }
             </div>
         </div>
-    @if (gallery.Length > 0)
-    {
-        <div class="mt-5">
-            <h2 class="h4 mb-3">Galeria zdjęć</h2>
-            <div class="row g-3">
-                @foreach (var image in gallery)
-                {
-                    <div class="col-6 col-md-4">
-                        <img src="@image" class="gallery-image rounded-3" alt="Zdjęcie samochodu" loading="lazy" />
-                    </div>
-                }
+        @if (gallery.Length > 0)
+        {
+            <div class="mt-5">
+                <h2 class="h4 mb-3">Galeria zdjęć</h2>
+                <div class="row g-3">
+                    @foreach (var image in gallery)
+                    {
+                        <div class="col-6 col-md-4">
+                            <img src="@image" class="gallery-image rounded-3" alt="Zdjęcie samochodu" loading="lazy" />
+                        </div>
+                    }
+                </div>
             </div>
-        </div>
-    }
-    @if (!string.IsNullOrWhiteSpace(Model.Opis))
-    {
-        <div class="card border-0 shadow-sm mt-4 p-4">
-            <h2 class="h4">Opis pojazdu</h2>
-            <p class="text-secondary mb-0">@Model.Opis</p>
-        </div>
-    }
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Opis))
+        {
+            <div class="card border-0 shadow-sm mt-4 p-4">
+                <h2 class="h4">Opis pojazdu</h2>
+                <p class="text-secondary mb-0">@Model.Opis</p>
+            </div>
+        }
     </div>
 </div>

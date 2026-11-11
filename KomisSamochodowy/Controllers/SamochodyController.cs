@@ -2,6 +2,7 @@ using KomisSamochodowy.Data;
 using KomisSamochodowy.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity; // <-- DODANO
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,18 +11,20 @@ using X.PagedList.Extensions;
 
 namespace KomisSamochodowy.Controllers
 {
-    [Authorize(Policy = "SprzedawcaOrAdmin")]
     public class SamochodyController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly UserManager<IdentityUser> _userManager; // <-- DODANO
 
-        public SamochodyController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
+        public SamochodyController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment, UserManager<IdentityUser> userManager) // <-- DODANO userManager
         {
             _context = context;
             _webHostEnvironment = webHostEnvironment;
+            _userManager = userManager; // <-- DODANO
         }
 
+        [Authorize(Policy = "SprzedawcaOrAdmin")]
         public async Task<IActionResult> Index()
         {
             var samochody = _context.Samochody.Include(s => s.Marka).Include(s => s.Model);
@@ -70,13 +73,30 @@ namespace KomisSamochodowy.Controllers
             var samochod = await _context.Samochody.FindAsync(id);
             if (samochod == null || samochod.Status != "Dostępny") return NotFound();
 
+            // 1. Zmiana statusu auta
             samochod.Status = "Zarezerwowany";
+
+            // 2. TWORZENIE WPISU W TABELI REZERWACJE (NOWY KOD)
+            var userId = _userManager.GetUserId(User);
+
+            var nowaRezerwacja = new Rezerwacja
+            {
+                SamochodId = id,
+                KlientId = userId,
+                DataRezerwacji = DateTime.Now,
+                Status = "Aktywna"
+            };
+
+            _context.Rezerwacje.Add(nowaRezerwacja); // Zapisujemy rezerwację
+
+            // 3. Zapis wszystkich zmian
             await _context.SaveChangesAsync();
 
             TempData["Sukces"] = "Samochód został zarezerwowany.";
             return RedirectToAction(nameof(Details), new { id });
         }
 
+        [Authorize(Policy = "SprzedawcaOrAdmin")]
         [HttpGet]
         public IActionResult Create()
         {
@@ -85,6 +105,7 @@ namespace KomisSamochodowy.Controllers
             return View();
         }
 
+        [Authorize(Policy = "SprzedawcaOrAdmin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("MarkaId,ModelId,RokProdukcji,Cena,Przebieg,Paliwo,PlikZdjecia,Status,Opis,GaleriaZdjec")] Samochod samochod)
@@ -112,6 +133,7 @@ namespace KomisSamochodowy.Controllers
             return View(samochod);
         }
 
+        [Authorize(Policy = "SprzedawcaOrAdmin")]
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -124,6 +146,7 @@ namespace KomisSamochodowy.Controllers
             return View(samochod);
         }
 
+        [Authorize(Policy = "SprzedawcaOrAdmin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,MarkaId,ModelId,RokProdukcji,Cena,Przebieg,Paliwo,ZdjecieUrl,PlikZdjecia,Status,Opis,GaleriaZdjec")] Samochod samochod)
@@ -134,6 +157,7 @@ namespace KomisSamochodowy.Controllers
             {
                 try
                 {
+                    // 1. Obsługa zdjęcia (to co już było)
                     if (samochod.PlikZdjecia != null)
                     {
                         string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
@@ -146,6 +170,21 @@ namespace KomisSamochodowy.Controllers
                         }
                         samochod.ZdjecieUrl = "/uploads/" + uniqueFileName;
                     }
+
+                    // 2. NOWY KOD: Jeśli sprzedawca ustawia status na "Dostępny", anulujemy aktywne rezerwacje
+                    if (samochod.Status == "Dostępny")
+                    {
+                        var aktywneRezerwacje = await _context.Rezerwacje
+                            .Where(r => r.SamochodId == id && r.Status == "Aktywna")
+                            .ToListAsync();
+
+                        foreach (var rezerwacja in aktywneRezerwacje)
+                        {
+                            rezerwacja.Status = "Anulowana";
+                        }
+                    }
+
+                    // 3. Zapis zmian w aucie i ewentualnych zmian w rezerwacjach
                     _context.Update(samochod);
                     await _context.SaveChangesAsync();
                 }
@@ -161,6 +200,7 @@ namespace KomisSamochodowy.Controllers
             return View(samochod);
         }
 
+        [Authorize(Policy = "SprzedawcaOrAdmin")]
         [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
@@ -170,6 +210,7 @@ namespace KomisSamochodowy.Controllers
             return View(samochod);
         }
 
+        [Authorize(Policy = "SprzedawcaOrAdmin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

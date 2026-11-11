@@ -98,9 +98,9 @@ public static class SeedData
                 Cena = 109900,
                 Przebieg = 29100,
                 Paliwo = "Hybryda",
-                ZdjecieUrl = "https://images.unsplash.com/photo-1550355291-byee04a92027?auto=format&fit=crop&w=900&q=85",
+                ZdjecieUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLi3ihRmHpdVEezYYdMsxsfigno-w0VbQVbFmSrNB4-w&s=10",
                 Opis = "Ekonomiczna Toyota Corolla Hybrid z niskim przebiegiem i pełną historią serwisową.",
-                GaleriaZdjec = "https://images.unsplash.com/photo-1550355291-byee04a92027?auto=format&fit=crop&w=900&q=85"
+                GaleriaZdjec = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLi3ihRmHpdVEezYYdMsxsfigno-w0VbQVbFmSrNB4-w&s=10"
             }
         };
 

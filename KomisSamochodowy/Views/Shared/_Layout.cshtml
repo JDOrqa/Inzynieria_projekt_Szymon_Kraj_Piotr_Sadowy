@@ -24,6 +24,13 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Samochody" asp-action="Oferty">Oferty</a>
                         </li>
 
+                        @if (User.IsInRole("Klient"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Rezerwacje" asp-action="Index">Moje Rezerwacje</a>
+                            </li>
+                        }
+
                         @if (User.IsInRole("Administrator") || User.IsInRole("Sprzedawca"))
                         {
                             <li class="nav-item">
