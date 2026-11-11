@@ -8,13 +8,13 @@ namespace KomisSamochodowy.Models
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Pole Marka jest wymagane.")]
-        [StringLength(50)]
-        public string Marka { get; set; }
+        [Required(ErrorMessage = "Wybierz markę.")]
+        public int MarkaId { get; set; }
+        public Marka? Marka { get; set; }
 
-        [Required(ErrorMessage = "Pole Model jest wymagane.")]
-        [StringLength(50)]
-        public string Model { get; set; }
+        [Required(ErrorMessage = "Wybierz model.")]
+        public int ModelId { get; set; }
+        public Model? Model { get; set; }
 
         [Required(ErrorMessage = "Pole Rok produkcji jest wymagane.")]
         [Range(1900, 2100, ErrorMessage = "Podaj poprawny rok produkcji.")]

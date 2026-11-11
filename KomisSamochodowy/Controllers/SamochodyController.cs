@@ -1,9 +1,12 @@
 using KomisSamochodowy.Data;
 using KomisSamochodowy.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using X.PagedList;
+using X.PagedList.Extensions;
 
 namespace KomisSamochodowy.Controllers
 {
@@ -21,18 +24,24 @@ namespace KomisSamochodowy.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Samochody.ToListAsync());
+            var samochody = _context.Samochody.Include(s => s.Marka).Include(s => s.Model);
+            return View(await samochody.ToListAsync());
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> Oferty()
+        public async Task<IActionResult> Oferty(int? page)
         {
-            var oferty = await _context.Samochody
-                .Where(s => s.Status == "Dostępny" || s.Status == "Zarezerwowany")
-                .OrderByDescending(s => s.Id)
-                .ToListAsync();
+            int pageSize = 6;
+            int pageNumber = (page ?? 1);
 
-            return View(oferty);
+            var oferty = _context.Samochody
+                .Include(s => s.Marka)
+                .Include(s => s.Model)
+                .Where(s => s.Status == "Dostępny" || s.Status == "Zarezerwowany")
+                .OrderByDescending(s => s.Id);
+
+            var listaOfert = await oferty.ToListAsync();
+            return View(listaOfert.ToPagedList(pageNumber, pageSize));
         }
 
         [AllowAnonymous]
@@ -40,7 +49,11 @@ namespace KomisSamochodowy.Controllers
         {
             if (id == null) return NotFound();
 
-            var samochod = await _context.Samochody.FindAsync(id);
+            var samochod = await _context.Samochody
+                .Include(s => s.Marka)
+                .Include(s => s.Model)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (samochod == null) return NotFound();
 
             var canViewSoldCar = User.IsInRole("Administrator") || User.IsInRole("Sprzedawca");
@@ -55,7 +68,6 @@ namespace KomisSamochodowy.Controllers
         public async Task<IActionResult> Reserve(int id)
         {
             var samochod = await _context.Samochody.FindAsync(id);
-
             if (samochod == null || samochod.Status != "Dostępny") return NotFound();
 
             samochod.Status = "Zarezerwowany";
@@ -68,12 +80,14 @@ namespace KomisSamochodowy.Controllers
         [HttpGet]
         public IActionResult Create()
         {
+            ViewBag.Marki = new SelectList(_context.Marki, "Id", "Nazwa");
+            ViewBag.Modele = new SelectList(_context.Modele, "Id", "Nazwa");
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Marka,Model,RokProdukcji,Cena,Przebieg,Paliwo,PlikZdjecia,Status,Opis,GaleriaZdjec")] Samochod samochod)
+        public async Task<IActionResult> Create([Bind("MarkaId,ModelId,RokProdukcji,Cena,Przebieg,Paliwo,PlikZdjecia,Status,Opis,GaleriaZdjec")] Samochod samochod)
         {
             if (ModelState.IsValid)
             {
@@ -81,22 +95,20 @@ namespace KomisSamochodowy.Controllers
                 {
                     string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
                     if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-
                     string uniqueFileName = Guid.NewGuid().ToString() + "_" + samochod.PlikZdjecia.FileName;
                     string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
                     using (var fileStream = new FileStream(filePath, FileMode.Create))
                     {
                         await samochod.PlikZdjecia.CopyToAsync(fileStream);
                     }
-
                     samochod.ZdjecieUrl = "/uploads/" + uniqueFileName;
                 }
-
                 _context.Samochody.Add(samochod);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.Marki = new SelectList(_context.Marki, "Id", "Nazwa", samochod.MarkaId);
+            ViewBag.Modele = new SelectList(_context.Modele, "Id", "Nazwa", samochod.ModelId);
             return View(samochod);
         }
 
@@ -104,16 +116,17 @@ namespace KomisSamochodowy.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
-
             var samochod = await _context.Samochody.FindAsync(id);
             if (samochod == null) return NotFound();
 
+            ViewBag.Marki = new SelectList(_context.Marki, "Id", "Nazwa", samochod.MarkaId);
+            ViewBag.Modele = new SelectList(_context.Modele, "Id", "Nazwa", samochod.ModelId);
             return View(samochod);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Marka,Model,RokProdukcji,Cena,Przebieg,Paliwo,ZdjecieUrl,PlikZdjecia,Status,Opis,GaleriaZdjec")] Samochod samochod)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,MarkaId,ModelId,RokProdukcji,Cena,Przebieg,Paliwo,ZdjecieUrl,PlikZdjecia,Status,Opis,GaleriaZdjec")] Samochod samochod)
         {
             if (id != samochod.Id) return NotFound();
 
@@ -125,18 +138,14 @@ namespace KomisSamochodowy.Controllers
                     {
                         string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
                         if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-
                         string uniqueFileName = Guid.NewGuid().ToString() + "_" + samochod.PlikZdjecia.FileName;
                         string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
                         using (var fileStream = new FileStream(filePath, FileMode.Create))
                         {
                             await samochod.PlikZdjecia.CopyToAsync(fileStream);
                         }
-
                         samochod.ZdjecieUrl = "/uploads/" + uniqueFileName;
                     }
-
                     _context.Update(samochod);
                     await _context.SaveChangesAsync();
                 }
@@ -147,6 +156,8 @@ namespace KomisSamochodowy.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.Marki = new SelectList(_context.Marki, "Id", "Nazwa", samochod.MarkaId);
+            ViewBag.Modele = new SelectList(_context.Modele, "Id", "Nazwa", samochod.ModelId);
             return View(samochod);
         }
 
@@ -154,10 +165,8 @@ namespace KomisSamochodowy.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
-
-            var samochod = await _context.Samochody.FirstOrDefaultAsync(m => m.Id == id);
+            var samochod = await _context.Samochody.Include(s => s.Marka).Include(s => s.Model).FirstOrDefaultAsync(m => m.Id == id);
             if (samochod == null) return NotFound();
-
             return View(samochod);
         }
 

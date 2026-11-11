@@ -1,0 +1,85 @@
+﻿@{
+    ViewData["Title"] = "Zarządzanie Słownikami";
+    var marki = ViewBag.Marki as List<KomisSamochodowy.Models.Marka>;
+    var modele = ViewBag.Modele as List<KomisSamochodowy.Models.Model>;
+}
+
+<div class="container py-4">
+    <h1 class="mb-4">Zarządzanie słownikami (Marki i Modele)</h1>
+
+    @if (TempData["Sukces"] != null)
+    {
+        <div class="alert alert-success">@TempData["Sukces"]</div>
+    }
+
+    <div class="row g-4">
+        <!-- Sekcja Marek -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0">Dodaj Markę</h2>
+                </div>
+                <div class="card-body">
+                    <form asp-action="DodajMarke" method="post" class="d-flex gap-2 mb-4">
+                        <input type="text" name="nazwaMarki" class="form-control" placeholder="Wpisz nazwę marki..." required />
+                        <button type="submit" class="btn btn-success">Dodaj</button>
+                    </form>
+
+                    <h5 class="mt-4">Lista Marek</h5>
+                    <ul class="list-group">
+                        @if (marki != null)
+                        {
+                            foreach (var marka in marki)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    @marka.Nazwa
+                                    <form asp-action="UsunMarke" asp-route-id="@marka.Id" method="post" class="m-0">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Usunięcie marki usunie też jej modele i zablokuje auta. Jesteś pewien?');">Usuń</button>
+                                    </form>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sekcja Modeli -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-secondary text-white">
+                    <h2 class="h5 mb-0">Dodaj Model</h2>
+                </div>
+                <div class="card-body">
+                    <form asp-action="DodajModel" method="post" class="mb-4">
+                        <div class="d-flex gap-2 mb-2">
+                            <select name="markaId" class="form-select" asp-items="ViewBag.MarkiList" required>
+                                <option value="">Wybierz markę...</option>
+                            </select>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <input type="text" name="nazwaModelu" class="form-control" placeholder="Wpisz nazwę modelu..." required />
+                            <button type="submit" class="btn btn-success">Dodaj</button>
+                        </div>
+                    </form>
+
+                    <h5 class="mt-4">Lista Modeli</h5>
+                    <ul class="list-group" style="max-height: 400px; overflow-y: auto;">
+                        @if (modele != null)
+                        {
+                            foreach (var m in modele)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><strong>@m.Marka?.Nazwa</strong> - @m.Nazwa</span>
+                                    <form asp-action="UsunModel" asp-route-id="@m.Id" method="post" class="m-0">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Na pewno usunąć ten model?');">Usuń</button>
+                                    </form>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

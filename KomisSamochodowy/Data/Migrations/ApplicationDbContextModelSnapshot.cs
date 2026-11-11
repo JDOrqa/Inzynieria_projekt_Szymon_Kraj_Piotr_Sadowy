@@ -22,6 +22,47 @@ namespace KomisSamochodowy.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("KomisSamochodowy.Models.Marka", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Nazwa")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Marki");
+                });
+
+            modelBuilder.Entity("KomisSamochodowy.Models.Model", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MarkaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nazwa")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MarkaId");
+
+                    b.ToTable("Modele");
+                });
+
             modelBuilder.Entity("KomisSamochodowy.Models.Rezerwacja", b =>
                 {
                     b.Property<int>("Id")
@@ -67,15 +108,11 @@ namespace KomisSamochodowy.Data.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<string>("Marka")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("MarkaId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Model")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("ModelId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Opis")
                         .HasMaxLength(1000)
@@ -102,6 +139,10 @@ namespace KomisSamochodowy.Data.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MarkaId");
+
+                    b.HasIndex("ModelId");
 
                     b.ToTable("Samochody");
                 });
@@ -340,6 +381,17 @@ namespace KomisSamochodowy.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("KomisSamochodowy.Models.Model", b =>
+                {
+                    b.HasOne("KomisSamochodowy.Models.Marka", "Marka")
+                        .WithMany()
+                        .HasForeignKey("MarkaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Marka");
+                });
+
             modelBuilder.Entity("KomisSamochodowy.Models.Rezerwacja", b =>
                 {
                     b.HasOne("KomisSamochodowy.Models.Samochod", "Samochod")
@@ -349,6 +401,25 @@ namespace KomisSamochodowy.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Samochod");
+                });
+
+            modelBuilder.Entity("KomisSamochodowy.Models.Samochod", b =>
+                {
+                    b.HasOne("KomisSamochodowy.Models.Marka", "Marka")
+                        .WithMany()
+                        .HasForeignKey("MarkaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("KomisSamochodowy.Models.Model", "Model")
+                        .WithMany()
+                        .HasForeignKey("ModelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Marka");
+
+                    b.Navigation("Model");
                 });
 
             modelBuilder.Entity("KomisSamochodowy.Models.Transakcja", b =>
