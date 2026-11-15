@@ -1,0 +1,59 @@
+﻿@model IEnumerable<KomisSamochodowy.Models.Rezerwacja>
+
+@{
+    ViewData["Title"] = "Zarządzanie Rezerwacjami";
+}
+
+<h2 class="mb-4">Wszystkie aktywne rezerwacje</h2>
+
+@if (TempData["Sukces"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Sukces"]
+    </div>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Data Rezerwacji</th>
+                <th>Klient (E-mail)</th>
+                <th>Pojazd</th>
+                <th>Cena</th>
+                <th>Akcja</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="5" class="text-center">Brak aktywnych rezerwacji.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.DataRezerwacji.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>
+                            @{
+                                var usersDict = ViewBag.Users as Dictionary<string, string>;
+                                var email = usersDict != null && usersDict.ContainsKey(item.KlientId) ? usersDict[item.KlientId] : "Nieznany";
+                            }
+                            @email
+                        </td>
+                        <td>@item.Samochod?.Marka?.Nazwa @item.Samochod?.Model?.Nazwa</td>
+                        <td>@item.Samochod?.Cena.ToString("C")</td>
+                        <td>
+                            <form asp-action="AnulujPrzezAdmina" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Czy na pewno chcesz przymusowo anulować tę rezerwację?');">
+                                <button type="submit" class="btn btn-danger btn-sm">Anuluj rezerwację</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

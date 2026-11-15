@@ -42,7 +42,7 @@ namespace KomisSamochodowy.Controllers
                     UserId = u.Id,
                     Email = u.Email ?? "(brak)",
                     Roles = roles.ToList(),
-                    IsLocked = u.LockoutEnd != null && u.LockoutEnd > DateTimeOffset.UtcNow 
+                    IsLocked = u.LockoutEnd != null && u.LockoutEnd > DateTimeOffset.UtcNow
                 });
             }
 
@@ -94,7 +94,7 @@ namespace KomisSamochodowy.Controllers
         }
 
         // ==========================================
-        // ZARZĄDZANIE SŁOWNIKAMI (SB5-05)
+        // ZARZĄDZANIE SŁOWNIKAMI (SB5-05 & SB6-05 Bug fixing)
         // ==========================================
 
         public async Task<IActionResult> Slowniki()
@@ -139,9 +139,16 @@ namespace KomisSamochodowy.Controllers
             var marka = await _context.Marki.FindAsync(id);
             if (marka != null)
             {
-                _context.Marki.Remove(marka);
-                await _context.SaveChangesAsync();
-                TempData["Sukces"] = "Marka została usunięta.";
+                try
+                {
+                    _context.Marki.Remove(marka);
+                    await _context.SaveChangesAsync();
+                    TempData["Sukces"] = "Marka została usunięta.";
+                }
+                catch (DbUpdateException)
+                {
+                    TempData["Blad"] = "Nie można usunąć tej marki, ponieważ są do niej przypisane modele lub samochody w ofercie.";
+                }
             }
             return RedirectToAction(nameof(Slowniki));
         }
@@ -153,9 +160,16 @@ namespace KomisSamochodowy.Controllers
             var model = await _context.Modele.FindAsync(id);
             if (model != null)
             {
-                _context.Modele.Remove(model);
-                await _context.SaveChangesAsync();
-                TempData["Sukces"] = "Model został usunięty.";
+                try
+                {
+                    _context.Modele.Remove(model);
+                    await _context.SaveChangesAsync();
+                    TempData["Sukces"] = "Model został usunięty.";
+                }
+                catch (DbUpdateException)
+                {
+                    TempData["Blad"] = "Nie można usunąć tego modelu, ponieważ przypisane są do niego samochody w ofercie.";
+                }
             }
             return RedirectToAction(nameof(Slowniki));
         }
@@ -166,6 +180,6 @@ namespace KomisSamochodowy.Controllers
         public string UserId { get; set; } = "";
         public string Email { get; set; } = "";
         public List<string> Roles { get; set; } = new();
-        public bool IsLocked { get; set; } 
+        public bool IsLocked { get; set; }
     }
 }

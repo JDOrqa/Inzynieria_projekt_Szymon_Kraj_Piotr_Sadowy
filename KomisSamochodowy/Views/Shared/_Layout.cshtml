@@ -40,6 +40,10 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Transakcje" asp-action="Index">Sprzedaż</a>
                             </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Rezerwacje" asp-action="WszystkieRezerwacje">Rezerwacje</a>
+                            </li>
                         }
 
                         @if (User.IsInRole("Administrator"))
@@ -63,11 +67,12 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - KomisSamochodowy - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="border-top footer text-muted mt-auto py-3">
+        <div class="container text-center">
+            Komis Samochodowy &copy; 2026 – Projekt zespołowy
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
