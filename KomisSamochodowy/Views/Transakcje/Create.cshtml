@@ -1,8 +1,6 @@
 @model KomisSamochodowy.Models.ViewModels.UtworzTransakcjeViewModel
 @{
     ViewData["Title"] = "Rejestracja Sprzedaży";
-    // Ustawiamy polską kulturę dla formatowania ceny
-    var plCulture = new System.Globalization.CultureInfo("pl-PL");
 }
 
 <div class="container py-4">
@@ -15,34 +13,59 @@
                     <form asp-action="Create" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                        <!-- ZMODYFIKOWANY WYBÓR SAMOCHODU -->
+                        <!-- Wybór Auta -->
                         <div class="form-group mb-3">
                             <label asp-for="SamochodId" class="control-label fw-semibold"></label>
                             <select asp-for="SamochodId" class="form-select" id="samochodSelect">
                                 <option value="">-- Wybierz auto z oferty --</option>
                                 @foreach (var auto in Model.DostepneSamochody)
                                 {
-                                    // Zamieniamy przecinek na kropkę dla JS
                                     var cenaDlaJs = auto.Cena.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                                    var isSelected = Model.SamochodId == auto.Id ? "selected" : null;
-
-                                    <option value="@auto.Id" data-cena="@cenaDlaJs" selected="@isSelected">
-                                        @auto.Marka @auto.Model (@auto.RokProdukcji) - @auto.Cena.ToString("N0") PLN
+                                    <option value="@auto.Id" data-cena="@cenaDlaJs">
+                                        @auto.Marka?.Nazwa @auto.Model?.Nazwa (@auto.RokProdukcji) - @auto.Cena.ToString("N0") PLN
                                     </option>
                                 }
                             </select>
                             <span asp-validation-for="SamochodId" class="text-danger"></span>
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label asp-for="KlientId" class="control-label fw-semibold"></label>
-                            <select asp-for="KlientId" asp-items="Model.Klienci" class="form-select">
-                                <option value="">-- Wybierz klienta z bazy --</option>
-                            </select>
-                            <span asp-validation-for="KlientId" class="text-danger"></span>
+                        <!-- WYBÓR KLIENTA (NOWY / ISTNIEJĄCY) -->
+                        <div class="form-group mb-3 p-3 bg-light rounded border">
+                            <label class="fw-semibold d-block mb-2">Klient</label>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" asp-for="CzyNowyKlient" value="false" id="radioIstniejacy" checked>
+                                <label class="form-check-label" for="radioIstniejacy">Wybierz istniejącego klienta z bazy</label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" asp-for="CzyNowyKlient" value="true" id="radioNowy">
+                                <label class="form-check-label" for="radioNowy">Zarejestruj nowego klienta</label>
+                            </div>
+
+                            <!-- Sekcja istniejącego klienta -->
+                            <div id="sekcjaIstniejacy">
+                                <select asp-for="KlientId" asp-items="Model.Klienci" class="form-select">
+                                    <option value="">-- Wybierz klienta z listy --</option>
+                                </select>
+                                <span asp-validation-for="KlientId" class="text-danger"></span>
+                            </div>
+
+                            <!-- Sekcja nowego klienta -->
+                            <div id="sekcjaNowy" class="d-none">
+                                <div class="mb-2">
+                                    <label asp-for="NowyKlientEmail" class="form-label"></label>
+                                    <input asp-for="NowyKlientEmail" class="form-control" />
+                                    <span asp-validation-for="NowyKlientEmail" class="text-danger"></span>
+                                </div>
+                                <div class="mb-2">
+                                    <label asp-for="NowyKlientHaslo" class="form-label"></label>
+                                    <input asp-for="NowyKlientHaslo" class="form-control" />
+                                    <span asp-validation-for="NowyKlientHaslo" class="text-danger"></span>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- POLE KWOTY (z id="kwotaInput" do obsługi JS) -->
+                        <!-- Kwota i Data -->
                         <div class="form-group mb-3">
                             <label asp-for="Kwota" class="control-label fw-semibold"></label>
                             <div class="input-group">
@@ -74,33 +97,43 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
-    <!-- SKRYPT AUTOMATYCZNIE POBIRAJĄCY CENĘ -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // --- AUTOMATYCZNE UZUPELNIANIE CENY ---
             const samochodSelect = document.getElementById("samochodSelect");
             const kwotaInput = document.getElementById("kwotaInput");
 
             function aktualizujCene() {
                 const selectedOption = samochodSelect.options[samochodSelect.selectedIndex];
-
-                // Jeśli wybrano auto (value nie jest puste)
                 if (selectedOption && selectedOption.value !== "") {
                     const cena = selectedOption.getAttribute("data-cena");
-                    if (cena) {
-                        kwotaInput.value = parseFloat(cena).toFixed(2);
-                    }
+                    if (cena) kwotaInput.value = parseFloat(cena).toFixed(2);
                 } else {
                     kwotaInput.value = "";
                 }
             }
-
-            // Podpięcie zdarzenia zmiany opcji
             samochodSelect.addEventListener("change", aktualizujCene);
 
-            // Jeśli wracamy do formularza z błędem i cena jest pusta, dociągamy ją
-            if (samochodSelect.value !== "" && kwotaInput.value === "") {
-                aktualizujCene();
+            // --- PRZEŁĄCZANIE KLIENTA ---
+            const radioIstniejacy = document.getElementById("radioIstniejacy");
+            const radioNowy = document.getElementById("radioNowy");
+            const sekcjaIstniejacy = document.getElementById("sekcjaIstniejacy");
+            const sekcjaNowy = document.getElementById("sekcjaNowy");
+
+            function toggleKlient() {
+                if (radioNowy.checked) {
+                    sekcjaNowy.classList.remove("d-none");
+                    sekcjaIstniejacy.classList.add("d-none");
+                } else {
+                    sekcjaNowy.classList.add("d-none");
+                    sekcjaIstniejacy.classList.remove("d-none");
+                }
             }
+            radioIstniejacy.addEventListener("change", toggleKlient);
+            radioNowy.addEventListener("change", toggleKlient);
+
+            // Wywołaj na starcie (gdyby walidacja zwróciła błąd i nowy klient był wybrany)
+            toggleKlient();
         });
     </script>
 }

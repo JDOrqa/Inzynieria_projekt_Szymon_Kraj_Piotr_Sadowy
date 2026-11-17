@@ -50,6 +50,23 @@ namespace KomisSamochodowy.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(UtworzTransakcjeViewModel model)
         {
+            // Jeśli wybrano nowego klienta, sprawdzamy czy podano email i hasło
+            if (model.CzyNowyKlient)
+            {
+                if (string.IsNullOrWhiteSpace(model.NowyKlientEmail) || string.IsNullOrWhiteSpace(model.NowyKlientHaslo))
+                {
+                    ModelState.AddModelError("", "Aby utworzyć nowego klienta, musisz podać jego e-mail i hasło.");
+                }
+            }
+            else
+            {
+                // Jeśli wybrano istniejącego klienta, sprawdzamy czy go wybrano
+                if (string.IsNullOrEmpty(model.KlientId))
+                {
+                    ModelState.AddModelError(nameof(model.KlientId), "Wybierz klienta z listy lub zaznacz opcję utworzenia nowego.");
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 var samochod = await _context.Samochody.FindAsync(model.SamochodId);
@@ -60,26 +77,44 @@ namespace KomisSamochodowy.Controllers
                     return View(model);
                 }
 
-                // Krok A: Tworzenie nowej transakcji
-                var sprzedawcaId = _userManager.GetUserId(User); // ID aktualnie zalogowanego sprzedawcy
+                // LOGIKA NOWEGO KLIENTA
+                if (model.CzyNowyKlient)
+                {
+                    var nowyUser = new IdentityUser { UserName = model.NowyKlientEmail, Email = model.NowyKlientEmail, EmailConfirmed = true };
+                    var createResult = await _userManager.CreateAsync(nowyUser, model.NowyKlientHaslo!);
 
+                    if (createResult.Succeeded)
+                    {
+                        await _userManager.AddToRoleAsync(nowyUser, "Klient");
+                        model.KlientId = nowyUser.Id; // Przypisujemy nowo utworzone ID do transakcji
+                    }
+                    else
+                    {
+                        foreach (var error in createResult.Errors)
+                        {
+                            ModelState.AddModelError("", "Błąd tworzenia konta: " + error.Description);
+                        }
+                        await PrzygotujListyRozwijane(model);
+                        return View(model);
+                    }
+                }
+
+                // Tworzenie transakcji
+                var sprzedawcaId = _userManager.GetUserId(User);
                 var transakcja = new Transakcja
                 {
                     DataTransakcji = model.DataTransakcji,
                     Kwota = model.Kwota,
                     SprzedawcaId = sprzedawcaId!,
-                    KlientId = model.KlientId,
+                    KlientId = model.KlientId!, // Tutaj będzie albo istniejące ID, albo nowo utworzone
                     SamochodId = model.SamochodId
                 };
                 _context.Transakcje.Add(transakcja);
 
-                // Krok B: Zmiana statusu samochodu na Sprzedany
+                // Zmiana statusu auta i anulowanie rezerwacji (to co mieliśmy wcześniej)
                 samochod.Status = "Sprzedany";
-
-                // Krok C: Anulowanie ewentualnej aktywnej rezerwacji
                 var aktywnaRezerwacja = await _context.Rezerwacje
                     .FirstOrDefaultAsync(r => r.SamochodId == model.SamochodId && r.Status == "Aktywna");
-
                 if (aktywnaRezerwacja != null)
                 {
                     aktywnaRezerwacja.Status = "Anulowana";
