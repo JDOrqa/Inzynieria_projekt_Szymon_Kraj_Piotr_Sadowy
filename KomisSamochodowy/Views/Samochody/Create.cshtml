@@ -1,95 +1,280 @@
 @model KomisSamochodowy.Models.Samochod
 
 @{
-    ViewData["Title"] = "Dodaj samochód";
+    ViewData["Title"] = "Dodaj nowy pojazd";
 }
 
-<h1>Dodaj samochód</h1>
-<hr />
+<style>
+    .form-container {
+        background: white;
+        border-radius: 1.25rem;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(23, 32, 51, 0.08);
+        animation: slideInUp 0.6s ease-out;
+    }
 
-<div class="row">
-    <div class="col-md-5">
-        <form asp-action="Create" method="post" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    .form-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #e1e9f8;
+    }
 
-            <div class="form-group mb-3">
-                <label asp-for="MarkaId" class="control-label">Marka</label>
-                <select asp-for="MarkaId" class="form-select" asp-items="ViewBag.Marki">
-                    <option value="">Wybierz markę</option>
-                </select>
-                <span asp-validation-for="MarkaId" class="text-danger"></span>
+    .form-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #172033;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-header p {
+        color: #647084;
+        font-size: 1.05rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-radius: 1rem;
+        border-left: 4px solid #0d6efd;
+    }
+
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0d6efd;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #172033;
+        margin-bottom: 0.6rem;
+        display: block;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid #e1e9f8;
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+        outline: none;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+        font-family: inherit;
+    }
+
+    .form-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #e1e9f8;
+    }
+
+    .form-buttons .btn {
+        min-width: 150px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .validation-errors {
+        display: none;
+    }
+
+    .validation-errors.show {
+        display: block;
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        border: 2px solid #dc3545;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        animation: slideInDown 0.4s ease-out;
+    }
+
+    .validation-errors h4 {
+        color: #842029;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .validation-errors ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .validation-errors li {
+        color: #842029;
+        margin-bottom: 0.5rem;
+    }
+
+    .text-danger {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.3rem;
+        display: block;
+        font-weight: 500;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="form-container">
+        <div class="form-header">
+            <h1><i class="bi bi-car-front"></i> Dodaj nowy pojazd</h1>
+            <p>Uzupełnij wszystkie wymagane pola, aby dodać nowy samochód do systemu</p>
+        </div>
+
+        <form asp-action="Create" method="post" enctype="multipart/form-data" novalidate>
+            @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+            {
+                <div class="validation-errors show">
+                    <h4><i class="bi bi-exclamation-circle"></i> Błędy walidacji</h4>
+                    <div asp-validation-summary="ModelOnly"></div>
+                </div>
+            }
+
+            <!-- Informacje podstawowe -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="bi bi-info-circle"></i> Informacje podstawowe
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="MarkaId">Marka pojazdu <span style="color: #dc3545;">*</span></label>
+                        <select asp-for="MarkaId" class="form-select" asp-items="ViewBag.Marki">
+                            <option value="">Wybierz markę</option>
+                        </select>
+                        <span asp-validation-for="MarkaId"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ModelId">Model <span style="color: #dc3545;">*</span></label>
+                        <select asp-for="ModelId" class="form-select" asp-items="ViewBag.Modele">
+                            <option value="">Wybierz model</option>
+                        </select>
+                        <span asp-validation-for="ModelId"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="RokProdukcji">Rok produkcji <span style="color: #dc3545;">*</span></label>
+                        <input asp-for="RokProdukcji" class="form-control" placeholder="np. 2023" />
+                        <span asp-validation-for="RokProdukcji"></span>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="ModelId" class="control-label">Model</label>
-                <select asp-for="ModelId" class="form-select" asp-items="ViewBag.Modele">
-                    <option value="">Wybierz model</option>
-                </select>
-                <span asp-validation-for="ModelId" class="text-danger"></span>
+            <!-- Specyfikacje i cena -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="bi bi-sliders"></i> Specyfikacje i cena
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Cena">Cena (PLN) <span style="color: #dc3545;">*</span></label>
+                        <input asp-for="Cena" class="form-control" type="text" placeholder="np. 45000" />
+                        <span asp-validation-for="Cena"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Przebieg">Przebieg (km) <span style="color: #dc3545;">*</span></label>
+                        <input asp-for="Przebieg" class="form-control" type="number" min="0" placeholder="np. 120000" />
+                        <span asp-validation-for="Przebieg"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Paliwo">Rodzaj paliwa <span style="color: #dc3545;">*</span></label>
+                        <select asp-for="Paliwo" class="form-select">
+                            <option value="">Wybierz paliwo</option>
+                            <option>Benzyna</option>
+                            <option>Diesel</option>
+                            <option>Hybryda</option>
+                            <option>Elektryczny</option>
+                            <option>LPG</option>
+                        </select>
+                        <span asp-validation-for="Paliwo"></span>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="RokProdukcji" class="control-label">Rok produkcji</label>
-                <input asp-for="RokProdukcji" class="form-control" />
-                <span asp-validation-for="RokProdukcji" class="text-danger"></span>
+            <!-- Zdjęcia -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="bi bi-image"></i> Zdjęcia pojazdu
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="PlikZdjecia">Główne zdjęcie pojazdu</label>
+                    <input type="file" asp-for="PlikZdjecia" class="form-control" accept="image/*" />
+                    <small class="text-muted">Obsługiwane formaty: JPG, PNG, GIF (maks. 10 MB)</small>
+                    <span asp-validation-for="PlikZdjecia"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="GaleriaZdjec">Galeria zdjęć (dodatkowe)</label>
+                    <input asp-for="GaleriaZdjec" class="form-control" placeholder="https://example.com/zdjecie1.jpg, https://example.com/zdjecie2.jpg" />
+                    <small class="text-muted">Wklejaj adresy URL oddzielone przecinkami</small>
+                    <span asp-validation-for="GaleriaZdjec"></span>
+                </div>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Cena" class="control-label"></label>
-                <input asp-for="Cena" class="form-control" type="text" />
-                <span asp-validation-for="Cena" class="text-danger"></span>
+            <!-- Status i opis -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="bi bi-clipboard-check"></i> Status i opis
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Status">Status pojazdu <span style="color: #dc3545;">*</span></label>
+                        <select asp-for="Status" class="form-select">
+                            <option value="">Wybierz status</option>
+                            <option>Dostępny</option>
+                            <option>Zarezerwowany</option>
+                            <option>Sprzedany</option>
+                        </select>
+                        <span asp-validation-for="Status"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Opis">Opis pojazdu</label>
+                    <textarea asp-for="Opis" class="form-control" placeholder="Opisz szczegóły pojazdu, historię serwisu, stan techniczny itp."></textarea>
+                    <span asp-validation-for="Opis"></span>
+                </div>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Przebieg" class="control-label"></label>
-                <input asp-for="Przebieg" class="form-control" min="0" />
-                <span asp-validation-for="Przebieg" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Paliwo" class="control-label"></label>
-                <select asp-for="Paliwo" class="form-select">
-                    <option value="">Wybierz paliwo</option>
-                    <option>Benzyna</option>
-                    <option>Diesel</option>
-                    <option>Hybryda</option>
-                    <option>Elektryczny</option>
-                    <option>LPG</option>
-                </select>
-                <span asp-validation-for="Paliwo" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="PlikZdjecia" class="control-label">Zdjęcie pojazdu</label>
-                <input type="file" asp-for="PlikZdjecia" class="form-control" accept="image/*" />
-                <span asp-validation-for="PlikZdjecia" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Status" class="control-label"></label>
-                <select asp-for="Status" class="form-select">
-                    <option>Dostępny</option>
-                    <option>Zarezerwowany</option>
-                    <option>Sprzedany</option>
-                </select>
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Opis" class="control-label"></label>
-                <textarea asp-for="Opis" class="form-control" rows="4"></textarea>
-                <span asp-validation-for="Opis" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="GaleriaZdjec" class="control-label">Galeria zdjęć</label>
-                <input asp-for="GaleriaZdjec" class="form-control" placeholder="URL-e zdjęć oddzielone przecinkami" />
-                <span asp-validation-for="GaleriaZdjec" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <button type="submit" class="btn btn-success">Dodaj samochód</button>
-                <a asp-action="Index" class="btn btn-secondary">Powrót do listy</a>
+            <!-- Przyciski akcji -->
+            <div class="form-buttons">
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-circle"></i> Dodaj pojazd
+                </button>
+                <a asp-action="Index" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-arrow-left"></i> Powrót
+                </a>
             </div>
         </form>
     </div>

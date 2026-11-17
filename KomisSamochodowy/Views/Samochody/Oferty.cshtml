@@ -5,24 +5,126 @@
     ViewData["Title"] = "Oferty samochodów";
 }
 
-<div class="container py-4">
-    <div class="hero-panel rounded-4 p-4 p-md-5 mb-4">
-        <span class="section-kicker">KOMIS SAMOCHODOWY</span>
-        <h1 class="display-5 fw-bold mt-2 mb-2">Znajdź samochód dla siebie</h1>
-        <p class="lead mb-0 text-secondary">Przeglądaj sprawdzone pojazdy dostępne w naszej ofercie.</p>
+<style>
+    .search-filter-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        animation: slideInDown 0.6s ease-out;
+    }
+
+    .search-filter-section h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #172033;
+        margin: 0;
+        min-width: 200px;
+    }
+
+    .search-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        flex: 1;
+        min-width: 250px;
+    }
+
+    .search-input {
+        flex: 1;
+        min-width: 150px;
+        max-width: 300px;
+    }
+
+    .search-input .input-group {
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(13, 110, 253, 0.1);
+    }
+
+    .input-group-text {
+        border: 2px solid #0d6efd !important;
+        color: #0d6efd;
+        background: white !important;
+    }
+
+    .search-input .form-control {
+        border: 2px solid #0d6efd !important;
+        padding: 0.6rem 0.75rem;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .search-input .form-control::placeholder {
+        color: #8d99aa;
+    }
+
+    .fuel-filter {
+        min-width: 130px;
+        max-width: 150px;
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 3rem;
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+        border: 2px dashed #0d6efd;
+        border-radius: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .no-results i {
+        font-size: 4rem;
+        color: #0d6efd;
+        margin-bottom: 1rem;
+        display: block;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .no-results h3 {
+        color: #172033;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .no-results p {
+        color: #647084;
+        font-size: 1.05rem;
+    }
+</style>
+
+<div class="container-fluid px-4 py-4">
+    <div class="hero-panel rounded-4 p-4 p-md-5 mb-5">
+        <span class="section-kicker"><i class="bi bi-tags"></i> KOMIS SAMOCHODOWY</span>
+        <h1 class="display-5 fw-bold mt-3 mb-2">Znajdź idealny samochód</h1>
+        <p class="lead mb-0">Przeglądaj naszą ofertę pojazd ów, które zostały dokładnie sprawdzone i przygotowane specjalnie dla Ciebie.</p>
     </div>
 
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div class="search-filter-section">
         <div>
-            <h2 class="h3 mb-1">Aktualne oferty</h2>
-            <span class="text-muted">Strona @Model.PageNumber z @Model.PageCount</span>
+            <h2>Aktualne oferty</h2>
+            <small class="text-muted">Strona @Model.PageNumber z @Model.PageCount (łącznie @Model.TotalItemCount pojazdów)</small>
         </div>
-        <div class="d-flex flex-wrap gap-2 search-box">
-            <div class="input-group flex-grow-1">
-                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-                <input id="offerSearch" type="search" class="form-control border-start-0" placeholder="Szukaj marki lub modelu..." aria-label="Szukaj oferty" />
+        <div class="search-controls">
+            <div class="search-input">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input id="offerSearch" type="search" class="form-control" placeholder="Szukaj marki lub modelu..." aria-label="Szukaj oferty" />
+                </div>
             </div>
-            <select id="fuelFilter" class="form-select" aria-label="Filtruj paliwo">
+            <select id="fuelFilter" class="form-select fuel-filter" aria-label="Filtruj paliwo">
                 <option value="">Wszystkie paliwa</option>
                 <option>Benzyna</option>
                 <option>Diesel</option>
@@ -37,10 +139,12 @@
         @foreach (var item in Model)
         {
             <div class="col-12 col-md-6 col-xl-4 offer-item" data-search="@item.Marka?.Nazwa @item.Model?.Nazwa @item.Paliwo" data-fuel="@item.Paliwo">
-                <article class="card car-card h-100 border-0 shadow-sm">
+                <article class="card car-card h-100 border-0">
                     @if (string.IsNullOrWhiteSpace(item.ZdjecieUrl))
                     {
-                        <div class="car-image image-placeholder"><i class="bi bi-car-front fs-1"></i></div>
+                        <div class="car-image image-placeholder">
+                            <i class="bi bi-car-front"></i>
+                        </div>
                     }
                     else
                     {
@@ -49,21 +153,35 @@
                     <div class="card-body d-flex flex-column p-4">
                         <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
                             <div>
-                                <h3 class="h4 mb-1">@item.Marka?.Nazwa @item.Model?.Nazwa</h3>
-                                <span class="text-muted">Rocznik @item.RokProdukcji</span>
+                                <h3 class="h4 mb-1 fw-bold">
+                                    <i class="bi bi-car-front"></i> @item.Marka?.Nazwa @item.Model?.Nazwa
+                                </h3>
+                                <span class="text-muted">
+                                    <i class="bi bi-calendar-event"></i> Rocznik @item.RokProdukcji
+                                </span>
                             </div>
                             @if (item.Status == "Zarezerwowany")
                             {
-                                <span class="badge text-bg-warning">ZAREZERWOWANE</span>
+                                <span class="badge text-bg-warning">
+                                    <i class="bi bi-bookmark-heart"></i> ZAREZERWOWANY
+                                </span>
                             }
                         </div>
                         <div class="car-specs mt-3 mb-4">
-                            <span><strong>@item.Przebieg.ToString("N0")</strong> km</span>
-                            <span>@item.Paliwo</span>
+                            <span>
+                                <i class="bi bi-speedometer"></i> <strong>@item.Przebieg.ToString("N0")</strong> km
+                            </span>
+                            <span>
+                                <i class="bi bi-droplet"></i> @item.Paliwo
+                            </span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mt-auto gap-3">
-                            <strong class="car-price">@item.Cena.ToString("N0") <small>PLN</small></strong>
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary">Szczegóły</a>
+                            <div class="car-price">
+                                <i class="bi bi-currency-dollar"></i> @item.Cena.ToString("N0") <small>PLN</small>
+                            </div>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary">
+                                <i class="bi bi-info-circle"></i> Szczegóły
+                            </a>
                         </div>
                     </div>
                 </article>
@@ -71,17 +189,21 @@
         }
     </div>
 
-    <div class="d-flex justify-content-center mt-5">
-        @Html.PagedListPager(Model, page => Url.Action("Oferty", new { page }), new PagedListRenderOptions
-        {
-            LiElementClasses = new[] { "page-item" },
+    @if (Model.TotalItemCount > 0)
+    {
+        <div class="pagination-container">
+            @Html.PagedListPager(Model, page => Url.Action("Oferty", new { page }), new PagedListRenderOptions
+            {
+                LiElementClasses = new[] { "page-item" },
                 PageClasses = new[] { "page-link" }
-                })
-    </div>
+            })
+        </div>
+    }
 
-    <div id="noOffers" class="empty-state text-center py-5 px-3 d-none">
-        <h2 class="h4">Nie znaleziono ofert</h2>
-        <p class="text-muted mb-0">Spróbuj zmienić wyszukiwaną frazę.</p>
+    <div id="noOffers" class="no-results d-none">
+        <i class="bi bi-search"></i>
+        <h3>Nie znaleziono ofert</h3>
+        <p class="mb-0">Spróbuj zmienić wyszukiwaną frazę lub wybrać inne kryteria filtrowania.</p>
     </div>
 </div>
 

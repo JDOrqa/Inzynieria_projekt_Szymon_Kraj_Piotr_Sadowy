@@ -4,49 +4,122 @@
     ViewData["Title"] = "Panel pojazdów";
 }
 
-<div class="container py-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-        <div>
-            <span class="section-kicker">ZARZĄDZANIE</span>
-            <h1 class="display-6 fw-bold mb-1">Panel pojazdów</h1>
-            <p class="text-muted mb-0">Pełna lista samochodów w bazie.</p>
+<style>
+    .header-section {
+        background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 2rem;
+        animation: slideInDown 0.6s ease-out;
+    }
+
+    .table-wrapper {
+        border-radius: 1.25rem;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(23, 32, 51, 0.08);
+    }
+
+    .table tbody tr td {
+        vertical-align: middle;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .table tbody tr:last-child {
+        border-bottom: none;
+    }
+</style>
+
+<div class="header-section">
+    <div>
+        <span class="section-kicker"><i class="bi bi-gear"></i> ZARZĄDZANIE</span>
+        <h1 class="display-6 fw-bold mb-1">Panel pojazdów</h1>
+        <p class="text-muted mb-0">Zarządzaj wszystkimi samochodami w bazie danych</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary btn-lg">
+        <i class="bi bi-plus-lg"></i> Dodaj nowy pojazd
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <div class="display-1 mb-3">
+            <i class="bi bi-inbox"></i>
         </div>
+        <h3>Brak pojazdów w bazie</h3>
+        <p class="text-muted mb-3">Nie masz jeszcze żadnych samochodów. Zacznij od dodania pierwszego pojazdu.</p>
         <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-lg"></i> Dodaj nowy pojazd
+            <i class="bi bi-plus-lg"></i> Dodaj pierwszy pojazd
         </a>
     </div>
-
-    <div class="card border-0 shadow-sm">
+}
+else
+{
+    <div class="table-wrapper">
         <div class="table-responsive">
             <table class="table align-middle mb-0">
-                <thead class="table-light">
+                <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Marka i model</th>
-                        <th>Rocznik</th>
-                        <th>Cena</th>
-                        <th>Status</th>
-                        <th class="text-end">Akcje</th>
+                        <th style="width: 8%;">ID</th>
+                        <th style="width: 25%;">Marka i model</th>
+                        <th style="width: 10%;">Rocznik</th>
+                        <th style="width: 15%;">Cena</th>
+                        <th style="width: 15%;">Status</th>
+                        <th style="width: 27%; text-align: right;">Akcje</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model)
                     {
                         <tr>
-                            <td class="text-muted">#@item.Id</td>
                             <td>
-                                <div class="fw-semibold">@item.Marka?.Nazwa @item.Model?.Nazwa</div>
-                                <small class="text-muted">@item.Paliwo · @item.Przebieg.ToString("N0") km</small>
+                                <span class="badge bg-light text-dark" style="font-size: 0.95rem;">#@item.Id</span>
+                            </td>
+                            <td>
+                                <div class="fw-semibold">
+                                    <i class="bi bi-car-front"></i> @item.Marka?.Nazwa @item.Model?.Nazwa
+                                </div>
+                                <small class="text-muted">
+                                    <i class="bi bi-droplet"></i> @item.Paliwo · 
+                                    <i class="bi bi-speedometer"></i> @item.Przebieg.ToString("N0") km
+                                </small>
                             </td>
                             <td>@item.RokProdukcji</td>
-                            <td class="fw-semibold">@item.Cena.ToString("N0") PLN</td>
+                            <td class="fw-semibold text-primary">
+                                <i class="bi "></i> @item.Cena.ToString("N0") PLN
+                            </td>
                             <td>
-                                <span class="badge status-badge status-@item.Status.ToLowerInvariant()">@item.Status</span>
+                                <span class="badge status-badge status-@item.Status.ToLowerInvariant()">
+                                    @item.Status
+                                </span>
                             </td>
                             <td class="text-end text-nowrap">
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary" title="Szczegóły"><i class="bi bi-eye"></i></a>
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Edytuj"><i class="bi bi-pencil"></i></a>
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Usuń"><i class="bi bi-trash"></i></a>
+                                <div class="action-buttons">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Szczegóły">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning" title="Edytuj">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Usuń">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -54,4 +127,4 @@
             </table>
         </div>
     </div>
-</div>
+}

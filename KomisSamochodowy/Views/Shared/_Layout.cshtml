@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,50 +9,58 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/KomisSamochodowy.styles.css" asp-append-version="true" />
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">KomisSamochodowy</a>
+        <nav class="navbar navbar-expand-lg navbar-light bg-white">
+            <div class="container-fluid px-4">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-car-front"></i> KomisSamochodowy
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Samochody" asp-action="Oferty">Oferty</a>
+                            <a class="nav-link" asp-area="" asp-controller="Samochody" asp-action="Oferty">
+                                <i class="bi bi-tags"></i> Oferty
+                            </a>
                         </li>
 
                         @if (User.IsInRole("Klient"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Rezerwacje" asp-action="Index">Moje Rezerwacje</a>
+                                <a class="nav-link" asp-controller="Rezerwacje" asp-action="Index">
+                                    <i class="bi bi-bookmark"></i> Moje Rezerwacje
+                                </a>
                             </li>
                         }
 
                         @if (User.IsInRole("Administrator") || User.IsInRole("Sprzedawca"))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Samochody" asp-action="Index">Panel pojazdów</a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Transakcje" asp-action="Index">Sprzedaż</a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Rezerwacje" asp-action="WszystkieRezerwacje">Rezerwacje</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="panelDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-gear"></i> Panel
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="panelDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Samochody" asp-action="Index"><i class="bi bi-car-front"></i> Panel pojazdów</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Transakcje" asp-action="Index"><i class="bi bi-cash-coin"></i> Sprzedaż</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Rezerwacje" asp-action="WszystkieRezerwacje"><i class="bi bi-bookmark"></i> Rezerwacje</a></li>
+                                </ul>
                             </li>
                         }
 
                         @if (User.IsInRole("Administrator"))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Panel administratora</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Slowniki">Słowniki</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-shield-lock"></i> Admin
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index"><i class="bi bi-people"></i> Panel administratora</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Slowniki"><i class="bi bi-book"></i> Słowniki</a></li>
+                                </ul>
                             </li>
                         }
                     </ul>
@@ -61,15 +69,15 @@
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="container-fluid px-4 flex-grow-1">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted mt-auto py-3">
+    <footer class="footer border-top py-2">
         <div class="container text-center">
-            Komis Samochodowy &copy; 2026 – Projekt zespołowy
+            <p class="mb-0"><strong>Komis Samochodowy</strong> &copy; 2026</p>
         </div>
     </footer>
 

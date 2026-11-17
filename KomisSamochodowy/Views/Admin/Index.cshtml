@@ -3,71 +3,193 @@
     ViewData["Title"] = "Panel administratora";
 }
 
-<h1>Panel administratora</h1>
-<p class="text-muted">Zarządzanie rolami użytkowników i blokadą kont.</p>
+<style>
+    .header-section {
+        background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        animation: slideInDown 0.6s ease-out;
+    }
+
+    .table-wrapper {
+        border-radius: 1.25rem;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(23, 32, 51, 0.08);
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .alert-custom {
+        border-radius: 1rem;
+        border: none;
+        padding: 1.25rem 1.5rem;
+        animation: slideInDown 0.4s ease-out;
+        margin-bottom: 2rem;
+    }
+
+    .role-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .status-active {
+        display: inline-block;
+        background: linear-gradient(135deg, #198754 0%, #157347 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .status-locked {
+        display: inline-block;
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .action-row {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .form-select {
+        min-width: 140px;
+    }
+
+    .btn-sm {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .user-email {
+        font-family: 'Courier New', monospace;
+        color: #0d6efd;
+        font-weight: 500;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(13, 110, 253, 0.03);
+    }
+</style>
+
+<div class="header-section">
+    <div>
+        <span class="section-kicker"><i class="bi bi-shield-lock"></i> ADMINISTRACJA</span>
+        <h1 class="display-6 fw-bold mb-1">Panel administratora</h1>
+        <p class="text-muted mb-0">Zarządzanie rolami użytkowników, statusami kont i uprawnieniami</p>
+    </div>
+</div>
 
 @if (TempData["Sukces"] != null)
 {
-    <div class="alert alert-success">@TempData["Sukces"]</div>
+    <div class="alert alert-success alert-custom" role="alert">
+        <i class="bi bi-check-circle"></i> <strong>Sukces!</strong> @TempData["Sukces"]
+    </div>
 }
 
-<table class="table table-striped align-middle">
-    <thead>
-        <tr>
-            <th>E-mail</th>
-            <th>Aktualna rola</th>
-            <th>Status konta</th>
-            <th>Zmień rolę</th>
-            <th>Blokada</th> <!-- NOWA KOLUMNA -->
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var u in Model)
-        {
-            <tr>
-                <td>@u.Email</td>
-                <td>@(u.Roles.Any() ? string.Join(", ", u.Roles) : "— brak —")</td>
-                <td>
-                    @if (u.IsLocked)
-                    {
-                        <span class="badge bg-danger">ZABLOKOWANE</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-success">AKTYWNE</span>
-                    }
-                </td>
-                <td>
-                    <form asp-action="ZmienRole" method="post" class="d-flex gap-2">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="userId" value="@u.UserId" />
-                        <select name="nowaRola" class="form-select form-select-sm" style="max-width:150px;">
-                            @foreach (var r in (List<string>)ViewBag.WszystkieRole)
+<div class="table-wrapper">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 25%;"><i class="bi bi-envelope"></i> E-mail</th>
+                    <th style="width: 15%;"><i class="bi bi-person-badge"></i> Rola</th>
+                    <th style="width: 15%;"><i class="bi bi-lock"></i> Status konta</th>
+                    <th style="width: 25%;">Zmień rolę</th>
+                    <th style="width: 20%; text-align: right;">Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in Model)
+                {
+                    <tr>
+                        <td>
+                            <span class="user-email">
+                                <i class="bi bi-person"></i> @u.Email
+                            </span>
+                        </td>
+                        <td>
+                            @if (u.Roles.Any())
                             {
-                                <option value="@r" selected="@(u.Roles.Contains(r) ? "selected" : null)">
-                                    @r
-                                </option>
+                                @foreach (var role in u.Roles)
+                                {
+                                    <span class="role-badge">@role</span>
+                                }
                             }
-                        </select>
-                        <button type="submit" class="btn btn-sm btn-primary">Zmień</button>
-                    </form>
-                </td>
-                <td>
-                    <!-- NOWY FORMULARZ BLOKADY -->
-                    <form asp-action="PrzelaczBlokade" method="post" class="m-0">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="userId" value="@u.UserId" />
-                        @if (u.IsLocked)
-                        {
-                            <button type="submit" class="btn btn-sm btn-outline-success" title="Odblokuj"><i class="bi bi-unlock"></i> Odblokuj</button>
-                        }
-                        else
-                        {
-                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Zablokuj"><i class="bi bi-lock"></i> Zablokuj</button>
-                        }
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                            else
+                            {
+                                <span style="color: #8d99aa; font-style: italic;">— brak roli —</span>
+                            }
+                        </td>
+                        <td>
+                            @if (u.IsLocked)
+                            {
+                                <span class="status-locked">
+                                    <i class="bi bi-lock-fill"></i> ZABLOKOWANE
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="status-active">
+                                    <i class="bi bi-check-circle-fill"></i> AKTYWNE
+                                </span>
+                            }
+                        </td>
+                        <td>
+                            <form asp-action="ZmienRole" method="post" class="action-row">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@u.UserId" />
+                                <select name="nowaRola" class="form-select form-select-sm">
+                                    @foreach (var r in (List<string>)ViewBag.WszystkieRole)
+                                    {
+                                        <option value="@r" selected="@(u.Roles.Contains(r) ? "selected" : null)">
+                                            @r
+                                        </option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-arrow-repeat"></i> Zmień
+                                </button>
+                            </form>
+                        </td>
+                        <td style="text-align: right;">
+                            <form asp-action="PrzelaczBlokade" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@u.UserId" />
+                                @if (u.IsLocked)
+                                {
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Odblokuj">
+                                        <i class="bi bi-unlock"></i> Odblokuj
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Zablokuj">
+                                        <i class="bi bi-lock"></i> Zablokuj
+                                    </button>
+                                }
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

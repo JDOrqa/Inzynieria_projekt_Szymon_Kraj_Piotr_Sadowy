@@ -1,8 +1,237 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Komis Samochodowy - Twój partner w świecie motoryzacji";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        color: white;
+        padding: 6rem 2rem;
+        border-radius: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 3rem;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 80%, rgba(255,255,255,0.05) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .hero-section > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        line-height: 1.1;
+        animation: slideInLeft 0.8s ease-out;
+    }
+
+    .hero-subtitle {
+        font-size: 1.3rem;
+        margin-bottom: 2rem;
+        opacity: 0.95;
+        animation: slideInLeft 0.8s ease-out 0.1s both;
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        animation: slideInLeft 0.8s ease-out 0.2s both;
+    }
+
+    .hero-buttons .btn {
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .features-section {
+        margin-top: 4rem;
+        margin-bottom: 3rem;
+    }
+
+    .feature-card {
+        background: white;
+        border-radius: 1.25rem;
+        padding: 2.5rem 2rem;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(23, 32, 51, 0.08);
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(13, 110, 253, 0.15);
+    }
+
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        margin: 0 auto 1.5rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .feature-card:nth-child(2) .feature-icon {
+        animation-delay: 0.1s;
+    }
+
+    .feature-card:nth-child(3) .feature-icon {
+        animation-delay: 0.2s;
+    }
+
+    .feature-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #172033;
+    }
+
+    .feature-text {
+        color: #647084;
+        line-height: 1.6;
+    }
+
+    .cta-section {
+        background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+        color: white;
+        border-radius: 1.5rem;
+        padding: 3rem 2rem;
+        text-align: center;
+        margin-top: 4rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .cta-section > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .cta-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+    }
+
+    .cta-text {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        opacity: 0.95;
+    }
+</style>
+
+<div class="hero-section">
+    <div class="container-fluid">
+        <h1 class="hero-title">
+            <i class="bi bi-car-front"></i> Komis Samochodowy
+        </h1>
+        <p class="hero-subtitle">
+            Odkryj idealny samochód dla siebie w naszej bogatej ofercie. Nowoczesny serwis, transparentne ceny, zadowoleni klienci.
+        </p>
+        <div class="hero-buttons">
+            <a href="@Url.Action("Oferty", "Samochody")" class="btn btn-light btn-lg">
+                <i class="bi bi-tags"></i> Przeglądaj oferty
+            </a>
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                @if (User.IsInRole("Klient"))
+                {
+                    <a href="@Url.Action("Index", "Rezerwacje")" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-bookmark"></i> Moje rezerwacje
+                    </a>
+                }
+            }
+            else
+            {
+                <a href="@Url.Action("Login", "Account", new { area = "Identity" })" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-box-arrow-in-right"></i> Zaloguj się
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="features-section">
+    <div class="container-fluid">
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <h3 class="feature-title">Zweryfikowane pojazdy</h3>
+                    <p class="feature-text">Wszystkie samochody przechodzą dokładną kontrolę jakości i historii serwisowej.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                    <h3 class="feature-title">Najlepsze ceny</h3>
+                    <p class="feature-text">Oferujemy konkurencyjne ceny bez ukrytych opłat. Przejrzysty cennik gwarantuje pełną transparentność.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h3 class="feature-title">Bezpieczne transakcje</h3>
+                    <p class="feature-text">Rezerwacje i transakcje realizowane z maksymalnym bezpieczeństwem i szybkością.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="cta-section">
+    <div class="container-fluid">
+        <h2 class="cta-title">Gotowy na zmianę?</h2>
+        <p class="cta-text">
+            Zarejestruj się teraz i zyskaj dostęp do exclusive ofert i rezerwacji samochodów z naszej kolekcji.
+        </p>
+        @if (!(User.Identity?.IsAuthenticated ?? false))
+        {
+            <a href="@Url.Action("Register", "Account", new { area = "Identity" })" class="btn btn-light btn-lg">
+                <i class="bi bi-person-plus"></i> Zarejestruj się teraz
+            </a>
+        }
+    </div>
 </div>

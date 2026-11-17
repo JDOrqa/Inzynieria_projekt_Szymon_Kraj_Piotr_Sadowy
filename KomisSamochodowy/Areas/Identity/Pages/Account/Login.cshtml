@@ -1,82 +1,282 @@
-﻿@page
+@page
 @model LoginModel
 
 @{
     ViewData["Title"] = "Zaloguj się";
 }
 
-<h1>@ViewData["Title"]</h1>
-<div class="row">
-    <div class="col-md-4">
-        <section>
-            <form id="account" method="post">
-                <h2>Użyj konta lokalnego, aby się zalogować.</h2>
-                <hr />
-                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label asp-for="Input.Email" class="form-label">Adres e-mail</label>
-                    <span asp-validation-for="Input.Email" class="text-danger"></span>
-                </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="haslo" />
-                    <label asp-for="Input.Password" class="form-label">Hasło</label>
-                    <span asp-validation-for="Input.Password" class="text-danger"></span>
-                </div>
-                <div class="checkbox mb-3">
-                    <label asp-for="Input.RememberMe" class="form-label">
+<style>
+    .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 80%, rgba(255,255,255,0.05) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .login-box {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 500px;
+        padding: 2rem;
+    }
+
+    .login-card {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 3.5rem 2.5rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideInUp 0.6s ease-out;
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .login-header h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #172033;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .login-header p {
+        color: #647084;
+        font-size: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-floating label {
+        color: #647084;
+        font-weight: 600;
+    }
+
+    .form-floating input {
+        border: 2px solid #e1e9f8;
+        border-radius: 0.75rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .form-floating input:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .checkbox-group .form-check-input {
+        width: 1.25rem;
+        height: 1.25rem;
+        border: 2px solid #e1e9f8;
+        border-radius: 0.4rem;
+        margin-right: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .checkbox-group .form-check-input:checked {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        border-color: #0d6efd;
+    }
+
+    .login-button {
+        width: 100%;
+        padding: 0.875rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        border-radius: 0.75rem;
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+    }
+
+    .login-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(13, 110, 253, 0.4);
+    }
+
+    .login-links {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e1e9f8;
+    }
+
+    .login-links a {
+        color: #0d6efd;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .login-links a:hover {
+        color: #0a58ca;
+        gap: 0.75rem;
+    }
+
+    .external-login-section {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #e1e9f8;
+        text-align: center;
+    }
+
+    .external-login-section h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #172033;
+        margin-bottom: 1rem;
+    }
+
+    .external-login-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .external-login-buttons .btn {
+        width: 100%;
+    }
+
+    .validation-errors {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        border: 2px solid #dc3545;
+        border-radius: 1rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: #842029;
+        font-weight: 500;
+        animation: slideInDown 0.4s ease-out;
+    }
+
+    .validation-errors ul {
+        margin: 0;
+        padding-left: 1.25rem;
+    }
+
+    .validation-errors li {
+        margin-bottom: 0.5rem;
+    }
+
+    .text-danger {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 0.3rem;
+        display: block;
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-box">
+        <div class="login-card">
+            <div class="login-header">
+                <h2><i class="bi bi-box-arrow-in-right"></i> Zaloguj się</h2>
+                <p>Wejdź na swoje konto, aby zarządzać rezerwacjami</p>
+            </div>
+
+            <section>
+                <form id="account" method="post" novalidate>
+                    @if (ModelState.ErrorCount > 0)
+                    {
+                        <div class="validation-errors">
+                            <div asp-validation-summary="ModelOnly"></div>
+                        </div>
+                    }
+
+                    <div class="form-group">
+                        <div class="form-floating">
+                            <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="nazwa@example.com" />
+                            <label asp-for="Input.Email" class="form-label"><i class="bi bi-envelope"></i> Adres e-mail</label>
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-floating">
+                            <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="hasło" />
+                            <label asp-for="Input.Password" class="form-label"><i class="bi bi-lock"></i> Hasło</label>
+                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group">
                         <input class="form-check-input" asp-for="Input.RememberMe" />
-                        Zapamiętaj mnie
-                    </label>
-                </div>
-                <div>
-                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Zaloguj się</button>
-                </div>
-                <div>
-                    <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">Zapomniałeś hasła?</a>
-                    </p>
-                    <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Zarejestruj się jako nowy użytkownik</a>
-                    </p>
-                    <p>
-                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Wyślij ponownie potwierdzenie e-mail</a>
-                    </p>
-                </div>
-            </form>
-        </section>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Użyj innej usługi do logowania.</h3>
-            <hr />
+                        <label class="form-check-label" asp-for="Input.RememberMe">
+                            Zapamiętaj mnie na tym urządzeniu
+                        </label>
+                    </div>
+
+                    <button id="login-submit" type="submit" class="login-button">
+                        <i class="bi bi-box-arrow-in-right"></i> Zaloguj się
+                    </button>
+
+                    <div class="login-links">
+                        <a id="forgot-password" asp-page="./ForgotPassword">
+                            <i class="bi bi-question-circle"></i> Zapomniałeś hasła?
+                        </a>
+                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">
+                            <i class="bi bi-person-plus"></i> Zarejestruj się
+                        </a>
+                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">
+                            <i class="bi bi-envelope-check"></i> Wyślij potwierdzenie e-mail
+                        </a>
+                    </div>
+                </form>
+            </section>
+
             @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                if ((Model.ExternalLogins?.Count ?? 0) > 0)
                 {
-                    <div>
-                        <p>
-                            Brak skonfigurowanych zewnętrznych usług uwierzytelniania. Zobacz ten <a href="https://go.microsoft.com/fwlink/?LinkID=532715">
-                                artykuł
-                                o konfigurowaniu logowania za pomocą usług zewnętrznych w aplikacji ASP.NET
-                            </a>.
-                        </p>
+                    <div class="external-login-section">
+                        <h3>Zaloguj się przy użyciu</h3>
+                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="external-login-buttons">
+                            @foreach (var provider in Model.ExternalLogins!)
+                            {
+                                <button type="submit" class="btn btn-outline-primary" name="provider" value="@provider.Name" title="Zaloguj się używając @provider.DisplayName">
+                                    <i class="bi bi-box-arrow-in-right"></i> @provider.DisplayName
+                                </button>
+                            }
+                        </form>
                     </div>
                 }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Zaloguj się używając konta @provider.DisplayName">@provider.DisplayName</button>
-                                }
-                            </p>
-                        </div>
-                    </form>
-                }
             }
-        </section>
+        </div>
     </div>
 </div>
 
